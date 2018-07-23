@@ -1,41 +1,39 @@
 package embgine.core.loaders;
 
-import embgine.core.EID;
 import embgine.core.GameObject;
 import embgine.core.Renderer;
 import embgine.core.Scene;
 import embgine.core.Script;
 
-abstract public class ObjectLoader implements EID{
+abstract public class ObjectLoader extends Loader<GameObject> {
 	
-	protected float width;
-	protected float height;
-	protected boolean gui;
-	protected Object[] rTemplates;
-	protected Class<? extends Script> script;
-	protected int layer;
-	protected Renderer[] renderers;
-	protected int type;
+	private float width;
+	private float height;
+	private boolean gui;
+	private Object[][] rTemplates;
+	private Class<? extends Script> script;
+	private int layer;
+	private Renderer[] renderers;
+	private int type;
 	
-	public ObjectLoader() {
-		
+	@SuppressWarnings("unchecked")
+	@Override
+	public void sets(Object... objects) {
+		width = (float)objects[0];
+		height = (float)objects[1];
+		gui = (boolean)objects[2];
+		rTemplates = (Object[][])objects[3];
+		script = (Class<? extends Script>)objects[4];
+		layer = (int)objects[5];
 	}
 	
-	public ObjectLoader(float w, float h, boolean g, Object[][] r, Class<? extends Script> s, int l) {
-		width = w;
-		height = h;
-		gui = g;
-		rTemplates = r;
-		script = s;
-		layer = l;
-	}
-	
-	public void sets() {
-		
+	@Override
+	public GameObject create(Object... scene) {
+		return new GameObject(width, height, renderers, gui, script, layer, type, (Scene)scene[0]);
 	}
 	
 	public Object[][] getTemplates() {
-		return (Object[][])rTemplates;
+		return rTemplates;
 	}
 	
 	public void giveRenderers(Renderer[] r) {
@@ -44,10 +42,6 @@ abstract public class ObjectLoader implements EID{
 	
 	public void giveType(int t) {
 		type = t;
-	}
-	
-	public GameObject create(Scene scene) {
-		return new GameObject(width, height, renderers, gui, script, layer, type, scene);
 	}
 	
 }

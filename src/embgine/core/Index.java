@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import embgine.core.loaders.MapLoader;
 import embgine.core.loaders.ObjectLoader;
@@ -40,6 +41,8 @@ public class Index {
 	private int        soundCount;
 	private int       objectCount;
 	private int        levelCount;
+	
+	private HashMap<String, Shape> shapeMap;
 	
 	private        Shape[]    shapeList;
 	private          Map[]      mapList;
@@ -125,9 +128,9 @@ public class Index {
 		shapeList = new Shape[len];
 		for(int i = 0; i < len; ++i) {
 			try {
-				ShapeLoader sl = ((ShapeLoader)loaders[i].getConstructors()[0].newInstance());
-				loaderCounter.registerShape(sl.getID());
-				shapeList[i] = ((ShapeLoader)loaders[i].getConstructors()[0].newInstance()).create(camera);
+				Shape sp = ((ShapeLoader)loaders[i].getConstructors()[0].newInstance()).create(camera);
+				shapeMap.put(loaders[i].getSimpleName(), sp);
+				shapeList[i] = sp;
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
@@ -276,6 +279,10 @@ public class Index {
     }
 	
 	//---------------------------------------------------------------------------------//
+	
+	public Shape getShape(String s) {
+		return shapeMap.get(s);
+	}
 	
 	public GameObject getObject(Class<? extends ObjectLoader> ol, Object... objects) {
 		try {
