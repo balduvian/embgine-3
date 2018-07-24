@@ -30,28 +30,14 @@ public class Index {
 	private Camera camera;
 	private ALManagement audio;
 	
-	private int[]      mapLoaders;
-	private int[]    shapeLoaders;
-	private int[]    soundLoaders;
-	private int[]   objectLoaders;
-	private int[]    levelLoaders;
-	
-	private int          mapCount;
-	private int        shapeCount;
-	private int        soundCount;
-	private int       objectCount;
-	private int        levelCount;
-	
-	private HashMap<String, Shape> shapeMap;
-	
-	private        Shape[]    shapeList;
-	private          Map[]      mapList;
-	private ObjectLoader[]   objectList;
-	private        Scene[]    sceneList;
-	private     Variable[] variableList;
-	private         Font[]     fontList;
-	private        Sound[]    soundList;
-	private        Block[]    blockList;
+	private HashMap<String, Scene       >  _sceneMap;
+	private HashMap<String, Shape       >  _shapeMap;
+	private HashMap<String, Global<?>   > _globalMap;
+	private HashMap<String, Sound       >   soundMap;
+	private HashMap<String, Font        >    fontMap;
+	private HashMap<String, ObjectLoader>  objectMap;
+	private HashMap<String, Block       >   blockMap;
+	private HashMap<String, Map         >     mapMap;
 	
 	private float gameWidth;
 	private float gameHeight;
@@ -59,31 +45,6 @@ public class Index {
 	private boolean debug;
 	
 	private Scene scene;
-	
-	public void  registerMap(int id) {
-		mapLoaders[id] = mapCount;
-		++mapCount;
-	}
-	
-	public void  registerShape(int id) {
-		shapeLoaders[id] = shapeCount;
-		++shapeCount;
-	}
-	
-	public void  registerSound(int id) {
-		soundLoaders[id] = soundCount;
-		++soundCount;
-	}
-	
-	public void registerObject(int id) {
-		objectLoaders[id] = objectCount;
-		++objectCount;
-	}
-	
-	public void  registerLevel(int id) {
-		levelLoaders[id] = levelCount;
-		++levelCount;
-	}
 	
 	public Index(float gw, float gh, String n, boolean db, Camera c, Window w, ALManagement a) {
 		gameWidth = gw;
@@ -94,22 +55,14 @@ public class Index {
 		window = w;
 		audio = a;
 		
-		shapeCount = 0;
-		mapLoaders    = new int[BYTE];
-		shapeLoaders  = new int[BYTE];
-		soundLoaders  = new int[BYTE];
-		objectLoaders = new int[BYTE];
-		levelLoaders  = new int[BYTE];
+		Scene.giveIndex(this);
 		
 		loadScenes();
 		loadShapes();
+		loadGlobals();
 	}
 	
 	public void sceneLoad(Scene sc) {
-		mapCount    = 0;
-		soundCount  = 0;
-		objectCount = 0;
-		levelCount  = 0;
 		loadSounds(sc.getSounds());
 		loadFonts(sc.getFonts());
 		loadGameObjects(sc.getObjects());
@@ -117,35 +70,57 @@ public class Index {
 		loadMaps(sc.getMaps());
 	}
 	
-	//initial loads
-	private void loadScenes() {
-		
-	}
-
-	protected void loadShapes() {
-		Class<? extends ShapeLoader>[] loaders = (Class<? extends ShapeLoader>[])getClasses("game/shapes");
-		int len = loaders.length;
-		shapeList = new Shape[len];
+	@SuppressWarnings("unchecked")
+	private <type> void baseLoad(String classPath, HashMap<String, type> map) {
+		Class<? extends type>[] classes = (Class<? extends type>[])getClasses(classPath);
+		int len = classes.length;
+		map = new HashMap<String, type>(len, 1.0f);
 		for(int i = 0; i < len; ++i) {
+			Class<? extends type> cl = classes[i];
 			try {
-				Shape sp = ((ShapeLoader)loaders[i].getConstructors()[0].newInstance()).create(camera);
-				shapeMap.put(loaders[i].getSimpleName(), sp);
-				shapeList[i] = sp;
-			} catch (Exception ex) {
+				type instance = (type)cl.getConstructors()[0].newInstance();
+				map.put(getHashName(cl), instance);
+			} catch(Exception ex) {
 				ex.printStackTrace();
 			}
 		}
 	}
 	
+	//initial loads
+	private void loadScenes() {
+		baseLoad("game/scenes", _sceneMap);
+	}
+
+	protected void loadShapes() {
+		baseLoad("game/shapes", _shapeMap);
+	}
+	
+	private void loadGlobals() {
+		baseLoad("game/globals", _globalMap);
+	}
+	
 	//scene specific loads
-	private void loadSounds(Class<? extends SoundLoader>[] sounds) {
-		int len = sounds.length;
-		soundList = new Sound[len];
+	private void loadSounds(String[] soundPaths) {
+		int len = soundPaths.length;
+		soundMap = new HashMap<String, Sound>();
 		for(int i = 0; i < len; ++i) {
-			SoundLoader sl = (SoundLoader)sounds[i].getClass().getConstructors()[0].newInstance();
-			GameObject s = objectList[new Entity_Controller(false).getID()].create();
-			loaderCounter.registerSound(sl.getID());
-			soundList[i] = sl.create();
+			String name = soundPaths[i];
+			
+			Sound sound = new Sound(name);
+			
+			StringBuilder build = new StringBuilder(32);
+			int nameLen = name.length();
+			boolean found = false;
+			for(int j = 0; j < nameLen; ++j) {
+				char c = name.charAt(j);
+				if(found) {
+					build.append(c);
+				}else {
+					found = (c == '/');
+				}
+			}
+			
+			soundMap.put(build.toString(), sound);
 		}
 	}
 	
@@ -216,7 +191,7 @@ public class Index {
 		}
 	}
 	
-	private void loadMaps(Class<? extends MapLoader>[] maps) {
+	private void loadMaps(Class<? extends Map>[] maps) {
 		int len = maps.length;
 		mapList = new Map[len];
 		for(int i = 0; i < len; ++i) {
@@ -257,6 +232,12 @@ public class Index {
 		return debug;
 	}
 	
+	/*
+	#################################################################################
+	################################# TOOLS  ########################################
+	#################################################################################
+	*/
+	
 	private Class[] getClasses(String packageName){
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         assert classLoader != null;
@@ -278,25 +259,41 @@ public class Index {
         return classes.toArray(new Class[classes.size()]);
     }
 	
-	//---------------------------------------------------------------------------------//
-	
-	public Shape getShape(String s) {
-		return shapeMap.get(s);
+	private String getHashName(Class<?> cl) {
+		String nam = cl.getSimpleName();
+		StringBuilder build = new StringBuilder(32);
+		int len = nam.length();
+		boolean found = false;
+		for(int i = 0; i < len; ++i) {
+			char c = nam.charAt(i);
+			if(found) {
+				build.append(c);
+			}else {
+				found = (c == '_');
+			}
+		}
+		return build.toString();
 	}
 	
-	public GameObject getObject(Class<? extends ObjectLoader> ol, Object... objects) {
-		try {
-			return objectList[objectLoaders[ol.getConstructor(boolean.class).newInstance(true).getID()]].create(scene);
-		}catch(Exception ex) {
-			return null;
-		}
+	/*
+	#################################################################################
+	################################# GETTERS #######################################
+	#################################################################################
+	*/
+	
+	public Shape getShape(String str) {
+		return _shapeMap.get(str);
 	}
 	
-	public Map getMap(Class<? extends MapLoader> ml) {
-		try {
-			return mapList[mapLoaders[ml.getConstructor(boolean.class).newInstance(true).getID()]];
-		}catch(Exception ex) {
-			return null;
-		}
+	public Sound getSound(String str) {
+		return soundMap.get(str);
+	}
+	
+	public GameObject getObject(Scene sc, String str) {
+		return objectMap.get(str).create(sc);
+	}
+	
+	public Map getMap(String str) {
+		return mapMap.get(str);
 	}
 }

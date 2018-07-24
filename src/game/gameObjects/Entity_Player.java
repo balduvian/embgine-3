@@ -8,9 +8,8 @@ import game.shapes.Shape_Rect;
 
 public class Entity_Player extends ObjectLoader{
 
-	@Override
-	public void setup() {
-		super.sets(
+	public Entity_Player() {
+		super(
 			0, 
 			0, 
 			true,

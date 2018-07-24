@@ -1,4 +1,4 @@
-package game.levels;
+package game.maps;
 
 import embgine.core.GameObject;
 import embgine.core.Scene;

@@ -1,4 +1,4 @@
-package game.levels;
+package game.maps;
 
 import embgine.core.MapReference;
 import game.block.Block_Bricks;

@@ -22,18 +22,18 @@ public class Scene {
 	
 	private Map map;
 	
-	private Class<? extends MapLoader> startLevel;
+	private Class<? extends Map> startMap;
 	
 	private int switchValue;
 	
-	protected Class<? extends  SoundLoader>[]  soundLoads;
+	protected                        String[]  soundLoads;
 	protected Class<? extends         Font>[]   fontLoads;
 	protected Class<? extends ObjectLoader>[] objectLoads;
 	protected Class<? extends        Block>[]  blockLoads;
-	protected Class<? extends    MapLoader>[]    mapLoads;
+	protected Class<? extends          Map>[]    mapLoads;
 	
-	public Scene(Class<? extends MapLoader> sl, Class<? extends SoundLoader>[] sounds, Class<? extends Font>[] fonts, Class<? extends ObjectLoader>[] objects, Class<? extends Block>[] blocks, Class<? extends MapLoader>[] maps) {
-		startLevel  = sl;
+	public Scene(Class<? extends Map> sl, String[] sounds, Class<? extends Font>[] fonts, Class<? extends ObjectLoader>[] objects, Class<? extends Block>[] blocks, Class<? extends Map>[] maps) {
+		startMap  = sl;
 		soundLoads  = sounds;
 		fontLoads   = fonts;
 		objectLoads = objects;
@@ -47,7 +47,7 @@ public class Scene {
 		sortLayers[4] = new SortLayer();
 	}
 	
-	public void giveIndex(Index x) {
+	public static void giveIndex(Index x) {
 		index = x;
 		
 		mapRect = new Shape(
@@ -69,7 +69,7 @@ public class Scene {
 		);
 	}
 	
-	public Class<? extends SoundLoader>[] getSounds() {
+	public String[] getSounds() {
 		return soundLoads;
 	}
 	
@@ -85,18 +85,18 @@ public class Scene {
 		return blockLoads;
 	}
 	
-	public Class<? extends MapLoader>[] getMaps() {
+	public Class<? extends Map>[] getMaps() {
 		return mapLoads;
 	}
 	
-	public void startMap(Class<? extends Map> mp) {
+	public void start(String mapName) {
 		sortLayers[0].clear();
 		sortLayers[1].clear();
 		sortLayers[2].clear();
 		sortLayers[3].clear();
 		sortLayers[4].clear();
 		
-		map = index.getMap(mp);
+		map = index.getMap(mapName);
 		
 		map.refreshWorkingCopy(this);
 	}
@@ -165,8 +165,8 @@ public class Scene {
 		switchValue = s;
 	}
 	
-	public GameObject createEntity(Class<? extends ObjectLoader> o, float x, float y, float[] params) {
-		GameObject ret = index.getObject(o);
+	public GameObject createEntity(String o, float x, float y, float[] params) {
+		GameObject ret = index.getObject(this, o);
 		sortLayers[ret.getLayer()].add(ret);
 		ret.getTransform().setPosition(x, y);
 		ret.getScript().start(params);
@@ -177,7 +177,7 @@ public class Scene {
 		sortLayers[o.getLayer()].sendForward(o.getIndex());
 	}
 	
-	public void soundEffect(Class<? extends SoundLoader> s, float v) {
+	public void soundEffect(String s, float v) {
 		index.getSound(s).setVolume(v);
 		index.getSound(s).play(false);
 	}

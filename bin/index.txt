@@ -1,0 +1,7 @@
+            Width: 16;
+           Height: 9;
+             Name: Embgine Test;
+       Frame Rate: D;
+      First Scene: 0;
+       Debug Mode: 1;
+      Full Screen: 0;

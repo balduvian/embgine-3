@@ -5,7 +5,7 @@ import embgine.core.Renderer;
 import embgine.core.Scene;
 import embgine.core.Script;
 
-abstract public class ObjectLoader extends Loader<GameObject> {
+abstract public class ObjectLoader {
 	
 	private float width;
 	private float height;
@@ -16,20 +16,17 @@ abstract public class ObjectLoader extends Loader<GameObject> {
 	private Renderer[] renderers;
 	private int type;
 	
-	@SuppressWarnings("unchecked")
-	@Override
-	public void sets(Object... objects) {
-		width = (float)objects[0];
-		height = (float)objects[1];
-		gui = (boolean)objects[2];
-		rTemplates = (Object[][])objects[3];
-		script = (Class<? extends Script>)objects[4];
-		layer = (int)objects[5];
+	public ObjectLoader(float w, float h, boolean g, Object[][] r, Class<? extends Script> s, int l) {
+		width      = w;
+		height     = h;
+		gui        = g;
+		rTemplates = r;
+		script     = s;
+		layer      = l;
 	}
 	
-	@Override
-	public GameObject create(Object... scene) {
-		return new GameObject(width, height, renderers, gui, script, layer, type, (Scene)scene[0]);
+	public GameObject create(Scene scene) {
+		return new GameObject(width, height, renderers, gui, script, layer, type, scene);
 	}
 	
 	public Object[][] getTemplates() {
