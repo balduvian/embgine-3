@@ -26,7 +26,20 @@ abstract public class ObjectLoader {
 	}
 	
 	public GameObject create(Scene scene) {
-		return new GameObject(width, height, renderers, gui, script, layer, type, scene);
+		try {
+			
+			int num = renderers.length;
+			Renderer[] cloneRenderers = new Renderer[num];
+			for(int i = 0; i < num; ++i) {
+				cloneRenderers[i] = renderers[i].clone();
+			}
+			
+			return new GameObject(width, height, cloneRenderers, gui, script, layer, type, scene);
+			
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return null;
+		}
 	}
 	
 	public Object[][] getTemplates() {

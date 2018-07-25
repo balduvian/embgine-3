@@ -1,12 +1,13 @@
 package game.scripts;
 
+import embgine.core.GameObject;
+import embgine.core.Scene;
 import embgine.core.Script;
 
 public class ControllerScript extends Script{
 
-	@Override
-	public Script clone() {
-		return new ControllerScript();
+	public ControllerScript(GameObject p, Scene s) {
+		super(p, s);
 	}
 
 	@Override

@@ -2,14 +2,12 @@ package embgine.core;
 
 import org.joml.Vector4f;
 
-import embgine.core.loaders.MapLoader;
+import embgine.core.loaders.BlockLoader;
 import embgine.core.loaders.ObjectLoader;
-import embgine.core.loaders.SoundLoader;
 import embgine.graphics.Packet;
 import embgine.graphics.Shader;
 import embgine.graphics.Shape;
 import embgine.graphics.Texture;
-import game.shapes.Shape_Rect;
 
 public class Scene {
 	
@@ -20,20 +18,21 @@ public class Scene {
 	private SortLayer[] sortLayers;
 	public static final int LAYERS = 5;
 	
-	private Map map;
+	private Map currentMap;
 	
-	private Class<? extends Map> startMap;
+	private String startMapName;
+	private Map startMap;
 	
-	private int switchValue;
+	private String switchValue;
 	
-	protected                        String[]  soundLoads;
-	protected Class<? extends         Font>[]   fontLoads;
-	protected Class<? extends ObjectLoader>[] objectLoads;
-	protected Class<? extends        Block>[]  blockLoads;
-	protected Class<? extends          Map>[]    mapLoads;
+	private                        String[]  soundLoads;
+	private Class<? extends         Font>[]   fontLoads;
+	private Class<? extends ObjectLoader>[] objectLoads;
+	private Class<? extends  BlockLoader>[]  blockLoads;
+	private Class<? extends          Map>[]    mapLoads;
 	
-	public Scene(Class<? extends Map> sl, String[] sounds, Class<? extends Font>[] fonts, Class<? extends ObjectLoader>[] objects, Class<? extends Block>[] blocks, Class<? extends Map>[] maps) {
-		startMap  = sl;
+	public Scene(String sl, String[] sounds, Class<? extends Font>[] fonts, Class<? extends ObjectLoader>[] objects, Class<? extends BlockLoader>[] blocks, Class<? extends Map>[] maps) {
+		startMapName = sl;
 		soundLoads  = sounds;
 		fontLoads   = fonts;
 		objectLoads = objects;
@@ -45,6 +44,10 @@ public class Scene {
 		sortLayers[2] = new SortLayer();
 		sortLayers[3] = new SortLayer();
 		sortLayers[4] = new SortLayer();
+	}
+	
+	public void loadStartMap() {
+		startMap  = index.getMap(startMapName);
 	}
 	
 	public static void giveIndex(Index x) {
@@ -81,7 +84,7 @@ public class Scene {
 		return objectLoads;
 	}
 	
-	public Class<? extends Block>[] getBlocks() {
+	public Class<? extends BlockLoader>[] getBlocks() {
 		return blockLoads;
 	}
 	
@@ -96,14 +99,26 @@ public class Scene {
 		sortLayers[3].clear();
 		sortLayers[4].clear();
 		
-		map = index.getMap(mapName);
+		currentMap = index.getMap(mapName);
 		
-		map.refreshWorkingCopy(this);
+		currentMap.refreshWorkingCopy(this);
 	}
 	
-	public int update() {
+	public void start() {
+		sortLayers[0].clear();
+		sortLayers[1].clear();
+		sortLayers[2].clear();
+		sortLayers[3].clear();
+		sortLayers[4].clear();
 		
-		switchValue = -1;
+		currentMap = startMap;
+		
+		currentMap.refreshWorkingCopy(this);
+	}
+	
+	public String update() {
+		
+		switchValue = null;
 		
 		for(int i = LAYERS-1; i > -1; --i) {
 			sortLayers[i].update();
@@ -117,8 +132,8 @@ public class Scene {
 		sortLayers[0].render();
 		sortLayers[1].render();
 		
-		int width = map.getWidth();
-		int height = map.getHeight();
+		int width = currentMap.getWidth();
+		int height = currentMap.getHeight();
 		
 		Packet packet = new Packet(0);
 		
@@ -127,7 +142,7 @@ public class Scene {
 		
 		for(int i = 0; i < width; ++i) {
 			for(int j = 0; j < height; ++j) {
-				Block b = map.access(i, j);
+				Block b = currentMap.access(i, j);
 				Texture t = b.getTexture();
 				Vector4f frame = t.getFrame(b.getValue());
 				
@@ -149,19 +164,15 @@ public class Scene {
 		sortLayers[4].render();
 	}
 	
-	public Index getIndex() {
-		return index;
-	}
-	
 	public Map getMap() {
-		return map;
+		return currentMap;
 	}
 	
 	public void destroy(GameObject o) {
 		sortLayers[o.getLayer()].remove(o.getIndex());
 	}
 	
-	public void switchScene(int s) {
+	public void switchScene(String s) {
 		switchValue = s;
 	}
 	

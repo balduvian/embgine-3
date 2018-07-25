@@ -1,31 +1,19 @@
 package embgine.core;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
-import embgine.core.loaders.MapLoader;
+import embgine.core.loaders.BlockLoader;
 import embgine.core.loaders.ObjectLoader;
 import embgine.core.loaders.ShapeLoader;
-import embgine.core.loaders.SoundLoader;
+import embgine.core.renderers.FontRenderer;
 import embgine.graphics.ALManagement;
 import embgine.graphics.Camera;
 import embgine.graphics.Shape;
 import embgine.graphics.Sound;
 import embgine.graphics.Window;
-import game.gameObjects.Entity_Controller;
-import game.gameObjects.Entity_Player;
 
 public class Index {
-	
-	public static final int BYTE = 256;
-	
-	public static final int RENDERER_COLOR_RENDERER = 0;
-	public static final int RENDERER_TILE_RENDERER = 1;
-	public static final int RENDERER_FONT_RENDERER = 2;
-	
+
 	private Window window;
 	private Camera camera;
 	private ALManagement audio;
@@ -36,15 +24,13 @@ public class Index {
 	private HashMap<String, Sound       >   soundMap;
 	private HashMap<String, Font        >    fontMap;
 	private HashMap<String, ObjectLoader>  objectMap;
-	private HashMap<String, Block       >   blockMap;
+	private HashMap<String, BlockLoader >   blockMap;
 	private HashMap<String, Map         >     mapMap;
 	
 	private float gameWidth;
 	private float gameHeight;
 	private String gameName;
 	private boolean debug;
-	
-	private Scene scene;
 	
 	public Index(float gw, float gh, String n, boolean db, Camera c, Window w, ALManagement a) {
 		gameWidth = gw;
@@ -56,6 +42,7 @@ public class Index {
 		audio = a;
 		
 		Scene.giveIndex(this);
+		ShapeLoader.giveCamera(camera);
 		
 		loadScenes();
 		loadShapes();
@@ -68,41 +55,67 @@ public class Index {
 		loadGameObjects(sc.getObjects());
 		loadBlocks(sc.getBlocks());
 		loadMaps(sc.getMaps());
+		
+		sc.loadStartMap();
+		
+		sc.start();
 	}
+	
+	/*
+	#################################################################################
+	################################# BASE LOADS ####################################
+	#################################################################################
+	*/
 	
 	@SuppressWarnings("unchecked")
 	private <type> void baseLoad(String classPath, HashMap<String, type> map) {
-		Class<? extends type>[] classes = (Class<? extends type>[])getClasses(classPath);
+		Class<? extends type>[] classes = (Class<? extends type>[])Utils.getClasses(classPath);
 		int len = classes.length;
 		map = new HashMap<String, type>(len, 1.0f);
 		for(int i = 0; i < len; ++i) {
 			Class<? extends type> cl = classes[i];
 			try {
 				type instance = (type)cl.getConstructors()[0].newInstance();
-				map.put(getHashName(cl), instance);
+				map.put(Utils.getHashName(cl), instance);
 			} catch(Exception ex) {
 				ex.printStackTrace();
 			}
 		}
 	}
 	
-	//initial loads
 	private void loadScenes() {
 		baseLoad("game/scenes", _sceneMap);
 	}
 
 	protected void loadShapes() {
-		baseLoad("game/shapes", _shapeMap);
+		@SuppressWarnings("unchecked")
+		Class<? extends ShapeLoader>[] classes = (Class<? extends ShapeLoader>[])Utils.getClasses("game/shapes");
+		int len = classes.length;
+		_shapeMap = new HashMap<String, Shape>(len, 1.0f);
+		for(int i = 0; i < len; ++i) {
+			Class<? extends ShapeLoader> cl = classes[i];
+			try {
+				Shape instance = ((ShapeLoader)cl.getConstructors()[0].newInstance()).create();
+				_shapeMap.put(Utils.getHashName(cl), instance);
+			} catch(Exception ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
 	
 	private void loadGlobals() {
 		baseLoad("game/globals", _globalMap);
 	}
 	
-	//scene specific loads
+	/*
+	#################################################################################
+	################################# PER-SCENE LOADS ###############################
+	#################################################################################
+	*/
+	
 	private void loadSounds(String[] soundPaths) {
 		int len = soundPaths.length;
-		soundMap = new HashMap<String, Sound>();
+		soundMap = new HashMap<String, Sound>(len, 1.0f);
 		for(int i = 0; i < len; ++i) {
 			String name = soundPaths[i];
 			
@@ -110,14 +123,17 @@ public class Index {
 			
 			StringBuilder build = new StringBuilder(32);
 			int nameLen = name.length();
-			boolean found = false;
-			for(int j = 0; j < nameLen; ++j) {
-				char c = name.charAt(j);
-				if(found) {
-					build.append(c);
-				}else {
-					found = (c == '/');
+			
+			int j = nameLen - 2;
+			
+			for( ; j > -1; --j) {
+				if(name.charAt(j) == '/') {
+					break;
 				}
+			}
+			
+			for(++j; j < nameLen; ++j) {
+				build.append(name.charAt(j));
 			}
 			
 			soundMap.put(build.toString(), sound);
@@ -126,85 +142,101 @@ public class Index {
 	
 	private void loadFonts(Class<? extends Font>[] fonts) {
 		int len = fonts.length;
-		fontList = new Font[fonts.length];
+		fontMap = new HashMap<String, Font>(len, 1.0f);
 		for(int i = 0; i < len; ++i) {
+			
+			Class<? extends Font> fc = fonts[i];
+			
+			Font f = null;
+			
 			try {
-				fontList[i] = (Font)fonts[i].getConstructors()[0].newInstance();
+				f = (Font)fc.getConstructors()[0].newInstance();
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
+			
+			fontMap.put(Utils.getHashName(fc), f);
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void loadGameObjects(Class<? extends ObjectLoader>[] objects) {
-		new Entity_Player();
+
 		int len = objects.length;
-		objectList = new ObjectLoader[len];
-		for(int i = 0; i < len; ++i) {
+		objectMap = new HashMap<String, ObjectLoader>(len, 1.0f);
+		
+		for(Class<? extends ObjectLoader> oc : objects) {
+			
+			ObjectLoader loader = null;
 			try {
-				objectList[i] = (ObjectLoader)objects[i].getConstructors()[0].newInstance();
+				loader = (ObjectLoader)oc.getConstructors()[0].newInstance();
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
-			Object[][] templates = objectList[i].getTemplates();
-			int len2 = templates.length;
-			Renderer[] rList = new Renderer[len2];
-			for(int j = 0; j < len2; ++j) {
-				Object[] template = templates[j];
+			
+			Object[][] templateList = loader.getTemplates();
+			int numRenderers = templateList.length;
+			Renderer[] rList = new Renderer[numRenderers];
+			
+			for(int j = 0; j < numRenderers; ++j) {
+				Object[] template = templateList[j];
 				
-				@SuppressWarnings("unchecked")
-				Class<Shape> shapeC = (Class<Shape>)template[1];
-				for(Shape sp : shapeList) {
-					if(sp.getClass() == shapeC) {
-						template[1] = sp; //replace the shape class in templates with the shape instance we have in index
-					}
-				}
-				
-				if(template.length > 2 && ((Class)template[2]) == Font.class) {
-					@SuppressWarnings("unchecked")
-					Class<Font> fontC = (Class<Font>)template[2];
-					for(Font fn : fontList) {
-						if(fn.getClass() == fontC) {
-							template[2] = fn; //replace the font class in templates with the font instance we have in index
-						}
-					}
+				//replace the shape string in the renderer template with the shape instance in here
+				template[1] = _getShape((String)template[1]);
+
+				//replace the shape string in the renderer template with the shape instance in here
+				if((Class<? extends Renderer>)template[0].getClass() == FontRenderer.class) {
+					template[2] = getFont((String)template[2]);
 				}
 				
 				try {
-					rList[j] = ((Class<Renderer>)templates[j][0]).getDeclaredConstructor(Object[].class).newInstance(templates[j]);
+					rList[j] = ((Class<? extends Renderer>)template[0]).getDeclaredConstructor(Object[].class).newInstance(template);
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
 			}
-			objectList[i].giveRenderers(rList);
+
+			loader.giveRenderers(rList);
+			
+			objectMap.put(Utils.getHashName(oc), loader);
 		}
 	}
 	
-	protected void loadBlocks(Class<? extends Block>[] blocks) {
+	protected void loadBlocks(Class<? extends BlockLoader>[] blocks) {
 		int len = blocks.length;
-		blockList = new Block[len];
-		for(int i = 0; i < len; ++i) {
+		blockMap = new HashMap<String, BlockLoader>(len, 1.0f);
+		
+		for(Class<? extends BlockLoader> cl : blocks) {
+			
 			try {
-				blockList[i] = (Block)blocks[i].getConstructors()[0].newInstance();
+				BlockLoader b = (BlockLoader)cl.getConstructors()[0].newInstance();
+				blockMap.put(Utils.getHashName(cl), b);
+			} catch(Exception ex) {
+				ex.printStackTrace();
 			}
-			catch(Exception ex) {}
 		}
 	}
 	
 	private void loadMaps(Class<? extends Map>[] maps) {
 		int len = maps.length;
-		mapList = new Map[len];
-		for(int i = 0; i < len; ++i) {
+		mapMap = new HashMap<String, Map>(len, 1.0f);
+		for(Class<? extends Map> cl : maps) {
 			try {
-				MapLoader m = (MapLoader)maps[i].getConstructors()[0].newInstance();
-				registerMap(m.getID());
-				mapList[i] = m.create();
+				Map m = (Map)cl.getConstructors()[0].newInstance();
+				mapMap.put(Utils.getHashName(cl), m);
+			} catch(Exception ex) {
+				ex.printStackTrace();
 			}
-			catch(Exception ex) {}
 		}
 	}
 	
-	public String name() {
+	/*
+	#################################################################################
+	################################# BASE GETTERS ##################################
+	#################################################################################
+	*/
+	
+	public String getName() {
 		return gameName;
 	}
 
@@ -234,63 +266,36 @@ public class Index {
 	
 	/*
 	#################################################################################
-	################################# TOOLS  ########################################
+	########################### USER TYPE GETTERS ###################################
 	#################################################################################
 	*/
 	
-	private Class[] getClasses(String packageName){
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        assert classLoader != null;
-       // String path = packageName.replace('.', '/');
-        File directory = new File(classLoader.getResource(packageName).getFile());
-        ArrayList<Class> classes = new ArrayList<Class>();
-
-        File[] files = directory.listFiles();
-        for (File file : files) {
-            if (file.getName().endsWith(".class")) {
-                try {
-					classes.add(Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6)));
-				} catch (ClassNotFoundException ex) {
-					ex.printStackTrace();
-				}
-            }
-        }
-        
-        return classes.toArray(new Class[classes.size()]);
-    }
-	
-	private String getHashName(Class<?> cl) {
-		String nam = cl.getSimpleName();
-		StringBuilder build = new StringBuilder(32);
-		int len = nam.length();
-		boolean found = false;
-		for(int i = 0; i < len; ++i) {
-			char c = nam.charAt(i);
-			if(found) {
-				build.append(c);
-			}else {
-				found = (c == '_');
-			}
-		}
-		return build.toString();
+	public Scene _getScene(String str) {
+		return _sceneMap.get(str);
 	}
 	
-	/*
-	#################################################################################
-	################################# GETTERS #######################################
-	#################################################################################
-	*/
-	
-	public Shape getShape(String str) {
+	public Shape _getShape(String str) {
 		return _shapeMap.get(str);
+	}
+	
+	public Global<?> _getGlobal(String str) {
+		return _globalMap.get(str);
 	}
 	
 	public Sound getSound(String str) {
 		return soundMap.get(str);
 	}
 	
+	public Font getFont(String str) {
+		return fontMap.get(str);
+	}
+	
 	public GameObject getObject(Scene sc, String str) {
 		return objectMap.get(str).create(sc);
+	}
+	
+	public Block getBlock(String str) {
+		return blockMap.get(str).create();
 	}
 	
 	public Map getMap(String str) {

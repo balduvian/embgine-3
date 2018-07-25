@@ -64,7 +64,7 @@ public class Window {
 	
 	private int fixedFrameRate;
 	
-	public Window(boolean fu, String t, boolean r, int fr) {
+	public Window(boolean fu, String t, boolean r) {
 		
 		glfwSetErrorCallback(GLFWErrorCallback.createPrint(System.err));
 		if(!glfwInit()) {
@@ -80,7 +80,7 @@ public class Window {
 		
 		vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());	
 
-		fixedFrameRate = fr;
+		fixedFrameRate = vidMode.refreshRate();
 		
 		if(fu) {
 			width = vidMode.width();

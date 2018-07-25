@@ -5,7 +5,6 @@ import embgine.core.renderers.TileRenderer;
 import embgine.graphics.Camera;
 import embgine.graphics.Shape;
 import embgine.graphics.Texture;
-import game.shapes.Shape_Rect;
 
 public class Splash {
 	
@@ -21,25 +20,25 @@ public class Splash {
 		camera.update();
 		
 		Shape rect = new Shape(
-				camera,
-				new float[] {
-		           0.5f, -0.5f, 0,
-		           0.5f,  0.5f, 0,
-		           -0.5f,  0.5f, 0,
-		           -0.5f, -0.5f, 0
-				}, new int[] {
-					0, 1, 3,
-					1, 2, 3
-				}, new float[] {
-			        1, 0,
-			        1, 1,
-			        0, 1,
-			        0, 0
-				}
+			camera,
+			new float[] {
+	           0.5f, -0.5f, 0,
+	           0.5f,  0.5f, 0,
+	           -0.5f,  0.5f, 0,
+	           -0.5f, -0.5f, 0
+			}, new int[] {
+				0, 1, 3,
+				1, 2, 3
+			}, new float[] {
+		        1, 0,
+		        1, 1,
+		        0, 1,
+		        0, 0
+			}
 		);
 		
-		logo = new GameObject(5, 7, new Renderer[] {new TileRenderer(rect, new Texture("embgine/standard/textures/logo.png"))}, new NullScript(), true, 0, -1);
-		white = new GameObject(16, 9, new Renderer[] {new ColorRenderer(rect)}, new NullScript(), true, 0, -1);
+		logo = new GameObject(5, 7, new Renderer[] {new TileRenderer(rect, new Texture("embgine/standard/textures/logo.png"))}, true, null, 0, -1, null);
+		white = new GameObject(16, 9, new Renderer[] {new ColorRenderer(rect)}, true, null, 0, -1, null);
 		((ColorRenderer)white.getRenderer(0)).setColor(1, 1, 1, 1);
 		timer = SHOW_TIME;
 	}

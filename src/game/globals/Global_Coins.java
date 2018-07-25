@@ -1,4 +1,4 @@
-package globals;
+package game.globals;
 
 import embgine.core.Global;
 

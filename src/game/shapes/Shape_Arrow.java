@@ -23,9 +23,4 @@ public class Shape_Arrow extends ShapeLoader{
 		);
 	}
 
-	@Override
-	public int getID() {
-		return 73;
-	}
-
 }

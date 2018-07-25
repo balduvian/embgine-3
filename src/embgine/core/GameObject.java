@@ -25,18 +25,17 @@ public class GameObject {
 	
 	private boolean onScreen;
 	
-	public GameObject(float w, float h, Renderer[] r, boolean g, Class<? extends Script> sc, int l, int p, Scene s) {
+	public GameObject(float w, float h, Renderer[] r, boolean g, Class<? extends Script> sc, int l, int p, Scene scene) {
 		transform = new Transform(w, h);
 		
-		renderers = r;
 		numRenderers = r.length;
-		for(int i = 0; i < numRenderers; ++i) {
-			renderers[i] = renderers[i].clone();
-		}
+		renderers = r;
 		
 		try {
-			script = (Script)script.getClass().getConstructors()[0].newInstance(this, s);
-		} catch(Exception ex) {}
+			script = (Script)script.getClass().getConstructors()[0].newInstance(this, scene);
+		} catch(Exception ex) {
+			script = null;
+		}
 		
 		enabled = true;
 		layer = l;
@@ -56,7 +55,7 @@ public class GameObject {
 	}
 	
 	public void update() {
-		if(enabled) {
+		if(enabled && script != null) {
 			script.update();
 		}
 	}

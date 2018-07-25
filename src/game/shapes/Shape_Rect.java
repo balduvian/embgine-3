@@ -1,11 +1,10 @@
 package game.shapes;
 
 import embgine.core.loaders.ShapeLoader;
-import embgine.graphics.Camera;
 
 public class Shape_Rect extends ShapeLoader{
 
-	public Shape_Rect(boolean b) {
+	public Shape_Rect() {
 		super(
 				new float[] {
 		           0.5f, -0.5f, 0,
@@ -22,11 +21,6 @@ public class Shape_Rect extends ShapeLoader{
 			        0, 0
 				}
 		);
-	}
-
-	@Override
-	public int getID() {
-		return 4;
 	}
 	
 }

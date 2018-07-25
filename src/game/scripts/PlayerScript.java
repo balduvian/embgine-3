@@ -1,11 +1,13 @@
 package game.scripts;
 
+import embgine.core.GameObject;
+import embgine.core.Scene;
 import embgine.core.Script;
 
 public class PlayerScript extends Script{
 
-	public Script clone() {
-		return new PlayerScript();
+	public PlayerScript(GameObject p, Scene s) {
+		super(p, s);
 	}
 
 	@Override
