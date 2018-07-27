@@ -5,6 +5,7 @@ import game.block.Block_Ground;
 import game.fonts.Font_Pixel;
 import game.gameObjects.Entity_Controller;
 import game.gameObjects.Entity_Player;
+import game.mapReferences.MapReference_World1;
 import game.maps.Map_Level1;
 
 public class Scene_Game extends Scene{
@@ -25,6 +26,9 @@ public class Scene_Game extends Scene{
 			}, 
 			new Class[] {
 				Block_Ground.class,
+			},
+			new Class[] {
+				MapReference_World1.class,
 			},
 			new Class[] {
 				Map_Level1.class,

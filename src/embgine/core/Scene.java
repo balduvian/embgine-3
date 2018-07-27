@@ -29,13 +29,15 @@ public class Scene {
 	private Class<? extends         Font>[]   fontLoads;
 	private Class<? extends ObjectLoader>[] objectLoads;
 	private Class<? extends  BlockLoader>[]  blockLoads;
+	private Class<? extends MapReference>[] mapReferenceLoads;
 	private Class<? extends          Map>[]    mapLoads;
 	
-	public Scene(String sl, String[] sounds, Class<? extends Font>[] fonts, Class<? extends ObjectLoader>[] objects, Class<? extends BlockLoader>[] blocks, Class<? extends Map>[] maps) {
+	public Scene(String sl, String[] sounds, Class<? extends Font>[] fonts, Class<? extends ObjectLoader>[] objects, Class<? extends BlockLoader>[] blocks, Class<? extends MapReference>[] refs, Class<? extends Map>[] maps) {
 		startMapName = sl;
 		soundLoads  = sounds;
 		fontLoads   = fonts;
 		objectLoads = objects;
+		mapReferenceLoads = refs;
 		mapLoads    = maps;
 		
 		sortLayers = new SortLayer[LAYERS];
@@ -70,26 +72,6 @@ public class Scene {
 		        0, 0
 			}
 		);
-	}
-	
-	public String[] getSounds() {
-		return soundLoads;
-	}
-	
-	public Class<? extends Font>[] getFonts() {
-		return fontLoads;
-	}
-	
-	public Class<? extends ObjectLoader>[] getObjects() {
-		return objectLoads;
-	}
-	
-	public Class<? extends BlockLoader>[] getBlocks() {
-		return blockLoads;
-	}
-	
-	public Class<? extends Map>[] getMaps() {
-		return mapLoads;
 	}
 	
 	public void start(String mapName) {
@@ -176,7 +158,7 @@ public class Scene {
 		switchValue = s;
 	}
 	
-	public GameObject createEntity(String o, float x, float y, float[] params) {
+	public GameObject createEntity(String o, float x, float y, Object... params) {
 		GameObject ret = index.getObject(this, o);
 		sortLayers[ret.getLayer()].add(ret);
 		ret.getTransform().setPosition(x, y);
@@ -191,6 +173,36 @@ public class Scene {
 	public void soundEffect(String s, float v) {
 		index.getSound(s).setVolume(v);
 		index.getSound(s).play(false);
+	}
+	
+	/*
+	######################################################################################
+	########################### GETTERS ##################################################
+	###################################################################################### 
+	*/
+	
+	public String[] getSounds() {
+		return soundLoads;
+	}
+	
+	public Class<? extends Font>[] getFonts() {
+		return fontLoads;
+	}
+	
+	public Class<? extends ObjectLoader>[] getObjects() {
+		return objectLoads;
+	}
+	
+	public Class<? extends BlockLoader>[] getBlocks() {
+		return blockLoads;
+	}
+	
+	public Class<? extends MapReference>[] getMapReferences(){
+		return mapReferenceLoads;
+	}
+	
+	public Class<? extends Map>[] getMaps() {
+		return mapLoads;
 	}
 
 }

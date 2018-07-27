@@ -2,20 +2,21 @@ package embgine.core;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
+import embgine.core.loaders.BlockLoader;
+
 public class Map {
 	
-	//a map is the world part of the level, without any of the entity or other data
-	//it can be used by gameobjects directly and through the maprenderer
+	private String refName;
+	private String mapPath;
 	
-	private Script scInstance;
-	private Class<? extends Script> script;
-	private Class<? extends Block>[][] tiles;
+	private MapScript scInstance;
+	private Class<? extends MapScript> script;
+	private BlockLoader[][] tiles;
 	private Block[][] workingCopy;
-	private Class<? extends Block> edgeTile;
+	private BlockLoader edgeTile;
 	
 	private int width;
 	private int height;
@@ -25,12 +26,18 @@ public class Map {
 	
 	private boolean edgeMode;
 	
-	public Map(String mapPath, MapReference mr, boolean em, Class<? extends Block> et, Class<? extends Script> sc) {
+	public Map(String mp, String rn, boolean em, BlockLoader et, Class<? extends MapScript> sc) {
+		
+		mapPath = mp;
+		refName = rn;
 		
 		script = sc;
 				
 		edgeMode = em;
 		edgeTile = et;
+	}
+	
+	public void init(Index index) {
 		
 		BufferedImage bi = null;
 		try {
@@ -40,13 +47,53 @@ public class Map {
 		width = bi.getWidth();
 		height = bi.getHeight();
 		
-		tiles = new Class[width][height];
+		tiles = new BlockLoader[width][height];
 		
-		for(int i = 0; i < width; ++i) {
-			for(int j = 0; j < height; ++j) {
-				tiles[i][j] = mr.getBlock(bi.getRGB(i, j));
+		MapReference ref = index.getMapReference(refName);
+		
+		int[] keys = ref.getBlockKeys();
+		BlockLoader[] blocks = ref.getBlockRefs();
+		int len = keys.length;
+		Thread[] threadList = new Thread[len];
+		
+		//CREATE OUR THREADS
+		for(int i = 0; i < len; ++i) {
+			(threadList[i] = new Thread(new LoaderThread(keys[i], blocks[i], bi))).start();
+		}
+		
+		//WAITS FOR THE THREADS TO DIE
+		for(int i = 0; i < len; ++i) {
+			try {
+				threadList[i].join();
+			} catch (InterruptedException ex) {
+				ex.printStackTrace();
 			}
 		}
+		
+	}
+	
+	private class LoaderThread implements Runnable{
+		
+		int key;
+		BlockLoader block;
+		BufferedImage image;
+		
+		public LoaderThread(int k, BlockLoader b, BufferedImage i) {
+			key = k;
+			block = b;
+			image = i;
+		}
+		
+		public void run() {
+			for(int i = 0; i < width; ++i) {
+				for(int j = 0; j < height; ++j) {
+					if(image.getRGB(i, j) == key) {
+						tiles[i][j] = block;
+					}
+				}
+			}
+		}
+		
 	}
 	
 	public void refreshWorkingCopy(Scene sc) {
@@ -55,7 +102,7 @@ public class Map {
 		for(int i = 0; i < width; ++i) {
 			for(int j = 0; j < height; ++j) {
 				try {
-					workingCopy[i][j] = (Block)tiles[i][j].getConstructors()[0].newInstance();
+					workingCopy[i][j] = tiles[i][j].create();
 				} catch (Exception ex) {
 					workingCopy[i][j] = null;
 				}
@@ -63,10 +110,10 @@ public class Map {
 		}
 		
 		try {
-			scInstance = (Script)script.getClass().getConstructors()[0].newInstance(null, sc);
+			scInstance = (MapScript)script.getClass().getConstructors()[0].newInstance(null, sc);
 		}catch(Exception ex) {}
 		
-		scInstance.start(new float[] {});
+		scInstance.start();
 	}
 	
 	public Block access(int x, int y) {
@@ -82,7 +129,7 @@ public class Map {
 			return workingCopy[x][y];
 		}catch(Exception ex) {
 			try {
-				return (Block)edgeTile.getConstructors()[0].newInstance();
+				return (Block)edgeTile.create();
 			} catch(Exception ex2) {
 				return null;
 			}

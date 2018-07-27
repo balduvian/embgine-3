@@ -1,4 +1,4 @@
-package game.index;
+package game.gameData;
 
 import embgine.core.GameData;
 

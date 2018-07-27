@@ -39,7 +39,7 @@ public class Base{
 			//make a bufferedReader to read the index.txt at its designated location
 			
 			@SuppressWarnings("unchecked")
-			Class<? extends GameData>[] gameDataClass = (Class<? extends GameData>[])Utils.getClasses("game/index"); 
+			Class<? extends GameData>[] gameDataClass = (Class<? extends GameData>[])Utils.getClasses("game/gameData"); 
 			GameData gd = (GameData)gameDataClass[0].getConstructors()[0].newInstance();
 			
 			gameWidth = gd.width;
@@ -60,7 +60,7 @@ public class Base{
 			
 			Shader.init();
 				
-			index = (Index)this.getClass().getClassLoader().loadClass("game.index.gameIndex").getConstructors()[0].newInstance(gameWidth, gameHeight, name, debugMode, camera, window, audio);
+			index = new Index(gameWidth, gameHeight, name, debugMode, camera, window, audio);
 			
 			splash = new Splash();
 			intro = true;

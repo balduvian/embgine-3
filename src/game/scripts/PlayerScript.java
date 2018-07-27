@@ -11,7 +11,7 @@ public class PlayerScript extends Script{
 	}
 
 	@Override
-	public void start(float[] params) {
+	public void start(Object... params) {
 
 	}
 

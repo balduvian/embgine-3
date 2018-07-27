@@ -12,7 +12,7 @@ public class Entity_Player extends ObjectLoader{
 			0, 
 			0, 
 			true,
-			new Object[][] {{ TileRenderer.class, "Rect", new Texture("test.png") }},
+			new Object[][] {{ TileRenderer.class, "Rect", new Texture("game/textures/player.png") }},
 			PlayerScript.class,
 			0
 		);

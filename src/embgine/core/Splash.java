@@ -37,7 +37,7 @@ public class Splash {
 			}
 		);
 		
-		logo = new GameObject(5, 7, new Renderer[] {new TileRenderer(rect, new Texture("embgine/standard/textures/logo.png"))}, true, null, 0, -1, null);
+		logo = new GameObject(5, 5, new Renderer[] {new TileRenderer(rect, new Texture("embgine/standard/logo.png"))}, true, null, 0, 0, null);
 		white = new GameObject(16, 9, new Renderer[] {new ColorRenderer(rect)}, true, null, 0, -1, null);
 		((ColorRenderer)white.getRenderer(0)).setColor(1, 1, 1, 1);
 		timer = SHOW_TIME;

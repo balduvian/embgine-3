@@ -22,7 +22,6 @@ public class Utils {
 	public static Class<?>[] getClasses(String packageName){
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         assert classLoader != null;
-       // String path = packageName.replace('.', '/');
         File directory = new File(classLoader.getResource(packageName).getFile());
         ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
 
@@ -30,7 +29,7 @@ public class Utils {
         for (File file : files) {
             if (file.getName().endsWith(".class")) {
                 try {
-					classes.add(Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6)));
+					classes.add(Class.forName(packageName.replace('/', '.') + '.' + file.getName().substring(0, file.getName().length() - 6)));
 				} catch (ClassNotFoundException ex) {
 					ex.printStackTrace();
 				}

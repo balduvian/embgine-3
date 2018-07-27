@@ -10,7 +10,7 @@ public abstract class Script {
 		scene = s;
 	}
 	
-	abstract public void start(float[] params);
+	abstract public void start(Object... params);
 	
 	abstract public void update();
 }

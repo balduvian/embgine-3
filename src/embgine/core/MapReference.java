@@ -1,26 +1,37 @@
 package embgine.core;
 
+import embgine.core.loaders.BlockLoader;
+
 public abstract class MapReference {
 	
 	private int len;
 	private int[] blockKeys;
-	private Class<? extends Block>[] blockRefs;
+	private String[] blockNames;
+	private BlockLoader[] blockRefs;
 	
-	public MapReference(String mp, int[] bk, Class<? extends Block>[] br) {
+	public MapReference(int[] bk, String[] br) {
 		blockKeys = bk;
-		blockRefs = br;
-		len = blockKeys.length;
+		
+		blockNames = br;
+	}
+	
+	public void init(Index index) {
+		int len = blockNames.length;
+		blockRefs = new BlockLoader[len];
+		for(int i = 0; i < len; ++i) {
+			blockRefs[i] = index.getBlockLoader(blockNames[i]);
+		}
 	}
 	
 	public int[] getBlockKeys() {
 		return blockKeys;
 	}
 	
-	public int[] getBlockRefs() {
-		return blockKeys;
+	public BlockLoader[] getBlockRefs() {
+		return blockRefs;
 	}
 	
-	public Class<? extends Block> getBlock(int color) {
+	public BlockLoader getBlock(int color) {
 		for(int i = 0; i < len; ++i) {
 			if(blockKeys[i] == color) {
 				try {

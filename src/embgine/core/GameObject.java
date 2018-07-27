@@ -7,11 +7,10 @@ public class GameObject {
 	private Transform transform;
 	
 	private Renderer[] renderers;
-	private int numRenderers;
 	
 	private Script script;
 	private boolean enabled;
-	private int tag;
+
 	private int index;
 	private int layer;
 	
@@ -25,11 +24,13 @@ public class GameObject {
 	
 	private boolean onScreen;
 	
-	public GameObject(float w, float h, Renderer[] r, boolean g, Class<? extends Script> sc, int l, int p, Scene scene) {
+	public GameObject(float w, float h, Renderer[] rs, boolean g, Class<? extends Script> sc, int l, int p, Scene scene) {
 		transform = new Transform(w, h);
 		
-		numRenderers = r.length;
-		renderers = r;
+		renderers = rs;
+		for(Renderer renderer : rs) {
+			renderer.setParent(this);
+		}
 		
 		try {
 			script = (Script)script.getClass().getConstructors()[0].newInstance(this, scene);
@@ -62,8 +63,8 @@ public class GameObject {
 	
 	public void render() {
 		if(enabled) {
-			for(int i = 0; i < numRenderers; ++i) {
-				renderers[i].render();
+			for(Renderer r : renderers) {
+				r.render();
 			}
 		}
 	}
@@ -84,20 +85,12 @@ public class GameObject {
 		enabled = e;
 	}
 	
-	public void setTag(int t) {
-		tag = t;
-	}
-	
 	public Transform getTransform() {
 		return transform;
 	}
 	
 	public Script getScript() {
 		return script;
-	}
-	
-	public int getTag() {
-		return tag;
 	}
 	
 	public int getIndex() {

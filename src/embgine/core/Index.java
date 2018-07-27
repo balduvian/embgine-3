@@ -18,14 +18,15 @@ public class Index {
 	private Camera camera;
 	private ALManagement audio;
 	
-	private HashMap<String, Scene       >  _sceneMap;
-	private HashMap<String, Shape       >  _shapeMap;
-	private HashMap<String, Global<?>   > _globalMap;
-	private HashMap<String, Sound       >   soundMap;
-	private HashMap<String, Font        >    fontMap;
-	private HashMap<String, ObjectLoader>  objectMap;
-	private HashMap<String, BlockLoader >   blockMap;
-	private HashMap<String, Map         >     mapMap;
+	private HashMap<String, Scene       >        _sceneMap;
+	private HashMap<String, Shape       >        _shapeMap;
+	private HashMap<String, Global<?>   >       _globalMap;
+	private HashMap<String, Sound       >         soundMap;
+	private HashMap<String, Font        >          fontMap;
+	private HashMap<String, ObjectLoader>  objectLoaderMap;
+	private HashMap<String, BlockLoader >         blockMap;
+	private HashMap<String, MapReference>  mapReferenceMap;
+	private HashMap<String, Map         >           mapMap;
 	
 	private float gameWidth;
 	private float gameHeight;
@@ -44,9 +45,9 @@ public class Index {
 		Scene.giveIndex(this);
 		ShapeLoader.giveCamera(camera);
 		
-		loadScenes();
-		loadShapes();
-		loadGlobals();
+		_loadScenes();
+		_loadShapes();
+		_loadGlobals();
 	}
 	
 	public void sceneLoad(Scene sc) {
@@ -54,6 +55,7 @@ public class Index {
 		loadFonts(sc.getFonts());
 		loadGameObjects(sc.getObjects());
 		loadBlocks(sc.getBlocks());
+		loadMapReferences(sc.getMapReferences());
 		loadMaps(sc.getMaps());
 		
 		sc.loadStartMap();
@@ -83,11 +85,11 @@ public class Index {
 		}
 	}
 	
-	private void loadScenes() {
+	private void _loadScenes() {
 		baseLoad("game/scenes", _sceneMap);
 	}
 
-	protected void loadShapes() {
+	protected void _loadShapes() {
 		@SuppressWarnings("unchecked")
 		Class<? extends ShapeLoader>[] classes = (Class<? extends ShapeLoader>[])Utils.getClasses("game/shapes");
 		int len = classes.length;
@@ -103,7 +105,7 @@ public class Index {
 		}
 	}
 	
-	private void loadGlobals() {
+	private void _loadGlobals() {
 		baseLoad("game/globals", _globalMap);
 	}
 	
@@ -163,10 +165,12 @@ public class Index {
 	private void loadGameObjects(Class<? extends ObjectLoader>[] objects) {
 
 		int len = objects.length;
-		objectMap = new HashMap<String, ObjectLoader>(len, 1.0f);
+		objectLoaderMap = new HashMap<String, ObjectLoader>(len, 1.0f);
 		
-		for(Class<? extends ObjectLoader> oc : objects) {
+		for(int i = 0; i < len; ++i) {
 			
+			Class<? extends ObjectLoader> oc = objects[i];
+					
 			ObjectLoader loader = null;
 			try {
 				loader = (ObjectLoader)oc.getConstructors()[0].newInstance();
@@ -198,7 +202,9 @@ public class Index {
 
 			loader.giveRenderers(rList);
 			
-			objectMap.put(Utils.getHashName(oc), loader);
+			loader.giveType(i);
+			
+			objectLoaderMap.put(Utils.getHashName(oc), loader);
 		}
 	}
 	
@@ -217,12 +223,28 @@ public class Index {
 		}
 	}
 	
+	private void loadMapReferences(Class<? extends MapReference>[] references) {
+		int len = references.length;
+		mapReferenceMap = new HashMap<String, MapReference>(len, 1.0f);
+		for(int i = 0; i < len; ++i) {
+			Class<? extends MapReference> cl = references[i];
+			try {
+				MapReference instance = ((MapReference)cl.getConstructors()[0].newInstance());
+				instance.init(this);
+				mapReferenceMap.put(Utils.getHashName(cl), instance);
+			} catch(Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+	}
+	
 	private void loadMaps(Class<? extends Map>[] maps) {
 		int len = maps.length;
 		mapMap = new HashMap<String, Map>(len, 1.0f);
 		for(Class<? extends Map> cl : maps) {
 			try {
 				Map m = (Map)cl.getConstructors()[0].newInstance();
+				m.init(this);
 				mapMap.put(Utils.getHashName(cl), m);
 			} catch(Exception ex) {
 				ex.printStackTrace();
@@ -291,11 +313,23 @@ public class Index {
 	}
 	
 	public GameObject getObject(Scene sc, String str) {
-		return objectMap.get(str).create(sc);
+		return objectLoaderMap.get(str).create(sc);
+	}
+	
+	public ObjectLoader getObjectLoader(String str) {
+		return objectLoaderMap.get(str);
 	}
 	
 	public Block getBlock(String str) {
 		return blockMap.get(str).create();
+	}
+	
+	public BlockLoader getBlockLoader(String str) {
+		return blockMap.get(str);
+	}
+	
+	public MapReference getMapReference(String str) {
+		return mapReferenceMap.get(str);
 	}
 	
 	public Map getMap(String str) {
