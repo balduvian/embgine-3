@@ -2,8 +2,8 @@ package embgine.core;
 
 import embgine.graphics.ALManagement;
 import embgine.graphics.Camera;
-import embgine.graphics.Shader;
 import embgine.graphics.Window;
+import embgine.graphics.shaders.Shader;
 
 public class Base{
 

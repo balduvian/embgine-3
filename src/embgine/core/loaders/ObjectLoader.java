@@ -1,9 +1,9 @@
 package embgine.core.loaders;
 
 import embgine.core.GameObject;
-import embgine.core.Renderer;
 import embgine.core.Scene;
 import embgine.core.Script;
+import embgine.core.renderers.Renderer;
 
 abstract public class ObjectLoader {
 	

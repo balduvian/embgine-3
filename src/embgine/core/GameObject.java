@@ -1,5 +1,7 @@
 package embgine.core;
 
+import embgine.core.renderers.Renderer;
+import embgine.core.renderers.TileRenderer;
 import embgine.graphics.Transform;
 
 public class GameObject {
@@ -28,9 +30,6 @@ public class GameObject {
 		transform = new Transform(w, h);
 		
 		renderers = rs;
-		for(Renderer renderer : rs) {
-			renderer.setParent(this);
-		}
 		
 		try {
 			script = (Script)script.getClass().getConstructors()[0].newInstance(this, scene);
@@ -64,6 +63,11 @@ public class GameObject {
 	public void render() {
 		if(enabled) {
 			for(Renderer r : renderers) {
+				if(r instanceof TileRenderer) {
+					((TileRenderer)r).giveFrame(frame);
+				}
+				r.setGui(gui);
+				r.setTransform(transform);
 				r.render();
 			}
 		}

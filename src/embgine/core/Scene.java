@@ -5,9 +5,9 @@ import org.joml.Vector4f;
 import embgine.core.loaders.BlockLoader;
 import embgine.core.loaders.ObjectLoader;
 import embgine.graphics.Packet;
-import embgine.graphics.Shader;
 import embgine.graphics.Shape;
 import embgine.graphics.Texture;
+import embgine.graphics.shaders.Shader;
 
 public class Scene {
 	

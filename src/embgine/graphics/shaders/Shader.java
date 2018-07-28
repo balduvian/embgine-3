@@ -1,16 +1,14 @@
-package embgine.graphics;
+package embgine.graphics.shaders;
 
 import static org.lwjgl.opengl.GL20.*;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
 
 import org.joml.Matrix4f;
-import org.joml.Vector4f;
+
+import embgine.graphics.Packet;
 
 abstract public class Shader {
 	
@@ -20,6 +18,7 @@ abstract public class Shader {
 	public static Noi2DShader NOI2DSHADER;
 	public static Rai2DShader RAI2DSHADER;
 	public static Fon2DShader FON2DSHADER;
+	public static Tex2DShader TEX2DSHADER;
 	
 	protected int program;
 	
@@ -32,6 +31,7 @@ abstract public class Shader {
 		NOI2DSHADER = new Noi2DShader();
 		RAI2DSHADER = new Rai2DShader();
 		FON2DSHADER = new Fon2DShader();
+		TEX2DSHADER = new Tex2DShader();
 	}
 	
 	protected Shader(String vertPath, String fragPath) {

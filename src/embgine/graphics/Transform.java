@@ -15,6 +15,12 @@ public class Transform {
 		rotation = r;
 	}
 	
+	public Transform(float x, float y, float w, float h) {
+		position = new Vector3f(x, y, 0);
+		size = new Vector2f(w, h);
+		rotation = 0;
+	}
+	
 	public Transform(Transform t) {
 		position = new Vector3f(t.position);
 		size = new Vector2f(t.size);

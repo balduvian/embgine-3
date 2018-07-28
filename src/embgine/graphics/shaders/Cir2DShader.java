@@ -1,7 +1,10 @@
-package embgine.graphics;
+package embgine.graphics.shaders;
 
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glUniform4f;
+
+import embgine.graphics.Packet;
+
 import static org.lwjgl.opengl.GL20.*;
 
 public class Cir2DShader extends Shader {
@@ -9,7 +12,7 @@ public class Cir2DShader extends Shader {
 	private int sizeLoc;
 	private int passColorLoc;
 	
-	protected Cir2DShader() {
+	public Cir2DShader() {
 		super("embgine/shaders/cir2d.vs", "embgine/shaders/cir2d.fs");
 	}
 	

@@ -6,6 +6,7 @@ import embgine.core.loaders.BlockLoader;
 import embgine.core.loaders.ObjectLoader;
 import embgine.core.loaders.ShapeLoader;
 import embgine.core.renderers.FontRenderer;
+import embgine.core.renderers.Renderer;
 import embgine.graphics.ALManagement;
 import embgine.graphics.Camera;
 import embgine.graphics.Shape;

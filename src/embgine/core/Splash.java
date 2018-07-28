@@ -1,19 +1,22 @@
 package embgine.core;
 
 import embgine.core.renderers.ColorRenderer;
-import embgine.core.renderers.TileRenderer;
+import embgine.core.renderers.TextureRenderer;
 import embgine.graphics.Camera;
 import embgine.graphics.Shape;
 import embgine.graphics.Texture;
+import embgine.graphics.Transform;
 
 public class Splash {
 	
 	private static final int SHOW_TIME = 2;
 	
 	private double timer;
-	private GameObject logo;
-	private GameObject white;
 	private Camera camera;
+	
+	private Transform gt;
+	private ColorRenderer white;
+	private TextureRenderer logo;
 	
 	public Splash() {
 		camera = new Camera(16, 9);
@@ -37,9 +40,12 @@ public class Splash {
 			}
 		);
 		
-		logo = new GameObject(5, 5, new Renderer[] {new TileRenderer(rect, new Texture("embgine/standard/logo.png"))}, true, null, 0, 0, null);
-		white = new GameObject(16, 9, new Renderer[] {new ColorRenderer(rect)}, true, null, 0, -1, null);
-		((ColorRenderer)white.getRenderer(0)).setColor(1, 1, 1, 1);
+		gt = new Transform(0, 0, 0, 0, 0);
+		
+		white = new ColorRenderer(rect);
+		white.setColor(1, 1, 1, 1);
+		logo = new TextureRenderer(rect, new Texture("embgine/standard/logo.png"));
+		
 		timer = SHOW_TIME;
 	}
 	
@@ -49,7 +55,14 @@ public class Splash {
 	}
 	
 	public void render() {
+		
+		gt.setSize(16, 9);
+		white.setTransform(gt);
 		white.render();
+		
+		gt.setSize(5, 5);
+		logo.setTransform(gt);
 		logo.render();
+		
 	}
 }

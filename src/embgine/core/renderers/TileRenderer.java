@@ -2,10 +2,10 @@ package embgine.core.renderers;
 
 import org.joml.Vector4f;
 
-import embgine.core.Renderer;
-import embgine.graphics.Shader;
+import embgine.graphics.Packet;
 import embgine.graphics.Shape;
 import embgine.graphics.Texture;
+import embgine.graphics.shaders.Shader;
 
 public class TileRenderer extends Renderer{
 	
@@ -16,15 +16,20 @@ public class TileRenderer extends Renderer{
 	}
 	
 	public TileRenderer(Shape sp, Texture t) {
-		super(sp, Shader.TIL2DSHADER, 0);
+		super(sp, Shader.TIL2DSHADER, new Packet(1, 1, 1, 1));
 		texture = t;
 	}
 	
-	protected void preRender() {
-		
-		Vector4f frame = texture.getFrame(parent.getFrame());
+	public void setColor(float r, float g, float b, float a) {
+		packet.setParams(r, g, b, a);
+	}
+	
+	public void giveFrame(int f) {
+		Vector4f frame = texture.getFrame(f);
 		packet.giveFrame(frame.x, frame.y, frame.z, frame.w);
-		
+	}
+	
+	protected void preRender() {
 		texture.bind();
 	}
 	
@@ -37,7 +42,7 @@ public class TileRenderer extends Renderer{
 	}
 
 	public TileRenderer (Object[] o) {
-		super((Shape)o[1], Shader.TIL2DSHADER, 0);
+		super((Shape)o[1], Shader.TIL2DSHADER, new Packet(1, 1, 1, 1));
 		texture = (Texture)o[2];
 	}
 

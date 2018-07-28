@@ -5,11 +5,10 @@ import java.util.ArrayList;
 import org.joml.Vector4f;
 
 import embgine.core.Font;
-import embgine.core.Renderer;
-import embgine.graphics.Shader;
+import embgine.graphics.Packet;
 import embgine.graphics.Shape;
-import embgine.graphics.Texture;
 import embgine.graphics.Transform;
+import embgine.graphics.shaders.Shader;
 
 public class FontRenderer extends Renderer {
 	
@@ -25,7 +24,7 @@ public class FontRenderer extends Renderer {
 	}
 	
 	public FontRenderer(Shape sp, Font f, float s, boolean cw, boolean ch, boolean ct) {
-		super(sp, Shader.TIL2DSHADER, 0);
+		super(sp, Shader.TIL2DSHADER, new Packet(1, 1, 1, 1));
 		font = f;
 		width = s;
 		height = s;
@@ -35,7 +34,7 @@ public class FontRenderer extends Renderer {
 	}
 	
 	public FontRenderer(Object[] o) {
-		super((Shape)o[1], Shader.TIL2DSHADER, 0);
+		super((Shape)o[1], Shader.TIL2DSHADER, new Packet(1, 1, 1, 1));
 		font = (Font)o[2];
 		width = (float)o[3];
 		height = (float)o[3];
@@ -88,15 +87,14 @@ public class FontRenderer extends Renderer {
 	}
 	
 	public void render() {
-		if(enabled && characters != null) {
+		if(characters != null) {
 			float startX;
 			float startY;
 			
+			Transform tp = new Transform(shape.getTransform());
+			
 			shape.getTransform().setSize(width, height);
 			
-			//System.out.println("you are kekd: " + (shape.getTransform().getPosition() == parent.getTransform().getPosition()));
-			
-			Transform tp = parent.getTransform();
 			if(!centeredW) {
 				if(!centeredH) {
 					startX = tp.getX()-tp.getWidth()/2+width/2;
@@ -137,12 +135,12 @@ public class FontRenderer extends Renderer {
 					char c = characters[i][j];
 					
 					Vector4f frame = font.getTexture().getFrame(c%16, c/16);
-					//System.out.println(c+" "+frame.x+" "+frame.y+" "+frame.z+" "+frame.w);
+
 					packet.giveFrame(frame.x, frame.y, frame.z, frame.w);
 					
 					shape.getTransform().setPosition(startX+x, startY+height*i);
 					
-					if(parent.getGui()) {
+					if(gui) {
 						renderRoutine(shape.getMatrix());
 					}else {
 						renderRoutine(shape.getGuiMatrix());
