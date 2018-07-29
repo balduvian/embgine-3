@@ -18,8 +18,6 @@ public class GameObject {
 	
 	private boolean eternal;
 	
-	private int frame;
-	
 	private boolean gui;
 	
 	private int type;
@@ -39,7 +37,6 @@ public class GameObject {
 		
 		enabled = true;
 		layer = l;
-		frame = 0;
 		gui = g;
 		eternal = false;
 		
@@ -63,9 +60,6 @@ public class GameObject {
 	public void render() {
 		if(enabled) {
 			for(Renderer r : renderers) {
-				if(r instanceof TileRenderer) {
-					((TileRenderer)r).giveFrame(frame);
-				}
 				r.setGui(gui);
 				r.setTransform(transform);
 				r.render();
@@ -99,14 +93,6 @@ public class GameObject {
 	
 	public int getIndex() {
 		return index;
-	}
-	
-	public void setFrame(int f) {
-		frame = f;
-	}
-	
-	public int getFrame() {
-		return frame;
 	}
 	
 	public void setGui(boolean g) {

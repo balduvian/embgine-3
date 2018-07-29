@@ -9,7 +9,7 @@ public class GameData_MarioDemo extends GameData{
 			16, 
 			9, 
 			"Mario Demo", 
-			"World1", 
+			"Game", 
 			true, 
 			false
 		);

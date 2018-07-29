@@ -18,20 +18,26 @@ public class Texture {
 	private float frameWidth;
 	private float frameHeight;
 	
+	public Texture(String path, boolean n) {
+		init(path, n);
+		frameWidth = 1;
+		frameHeight = 1;
+	}
+	
 	public Texture(String path) {
-		init(path);
+		init(path, true);
 		frameWidth = 1;
 		frameHeight = 1;
 	}
 	
 	public Texture(String path, int fw, int ft){
-		init(path);
+		init(path, true);
 		frameWidth = 1f/fw;
 		frameHeight = 1f/ft;
 	}
 	
 	public Texture(String path, int fw){
-		init(path);
+		init(path, true);
 		frameWidth = 1f/fw;
 		frameHeight = 1f;
 	}
@@ -44,7 +50,7 @@ public class Texture {
 		return new Vector4f(frameWidth, 1, x*frameWidth, 1);
 	}
 	
-	private void init(String path) {
+	private void init(String path, boolean nearest) {
 		try {
 			BufferedImage b = ImageIO.read(this.getClass().getClassLoader().getResource(path).openStream());
 			int h = b.getHeight();
@@ -65,8 +71,13 @@ public class Texture {
 			bind();
 			//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 			//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			if(nearest) {
+				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			}else {
+				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			}
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 			unbind();
 			

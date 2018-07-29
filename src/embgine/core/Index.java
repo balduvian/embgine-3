@@ -1,6 +1,7 @@
 package embgine.core;
 
 import java.util.HashMap;
+import java.util.Set;
 
 import embgine.core.loaders.BlockLoader;
 import embgine.core.loaders.ObjectLoader;
@@ -70,26 +71,22 @@ public class Index {
 	#################################################################################
 	*/
 	
-	@SuppressWarnings("unchecked")
-	private <type> void baseLoad(String classPath, HashMap<String, type> map) {
-		Class<? extends type>[] classes = (Class<? extends type>[])Utils.getClasses(classPath);
+	private void _loadScenes() {
+		@SuppressWarnings("unchecked")
+		Class<? extends Scene>[] classes = (Class<? extends Scene>[])Utils.getClasses("game/scenes");
 		int len = classes.length;
-		map = new HashMap<String, type>(len, 1.0f);
+		_sceneMap = new HashMap<String, Scene>(len, 1.0f);
 		for(int i = 0; i < len; ++i) {
-			Class<? extends type> cl = classes[i];
+			Class<? extends Scene> cl = classes[i];
 			try {
-				type instance = (type)cl.getConstructors()[0].newInstance();
-				map.put(Utils.getHashName(cl), instance);
+				Scene instance = (Scene)cl.getConstructors()[0].newInstance();
+				_sceneMap.put(Utils.getHashName(cl), instance);
 			} catch(Exception ex) {
 				ex.printStackTrace();
 			}
 		}
 	}
 	
-	private void _loadScenes() {
-		baseLoad("game/scenes", _sceneMap);
-	}
-
 	protected void _loadShapes() {
 		@SuppressWarnings("unchecked")
 		Class<? extends ShapeLoader>[] classes = (Class<? extends ShapeLoader>[])Utils.getClasses("game/shapes");
@@ -107,7 +104,19 @@ public class Index {
 	}
 	
 	private void _loadGlobals() {
-		baseLoad("game/globals", _globalMap);
+		@SuppressWarnings("unchecked")
+		Class<? extends Global<?>>[] classes = (Class<? extends Global<?>>[])Utils.getClasses("game/globals");
+		int len = classes.length;
+		_globalMap = new HashMap<String, Global<?>>(len, 1.0f);
+		for(int i = 0; i < len; ++i) {
+			Class<? extends Global<?>> cl = classes[i];
+			try {
+				Global<?> instance = (Global<?>)cl.getConstructors()[0].newInstance();
+				_globalMap.put(Utils.getHashName(cl), instance);
+			} catch(Exception ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
 	
 	/*
@@ -294,6 +303,13 @@ public class Index {
 	*/
 	
 	public Scene _getScene(String str) {
+		/*
+		Set<String> p = _sceneMap.keySet();
+		for(String s : p) {
+			System.out.println(s);
+		}
+		System.exit(0);
+		*/
 		return _sceneMap.get(str);
 	}
 	

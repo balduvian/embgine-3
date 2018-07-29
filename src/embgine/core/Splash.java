@@ -1,6 +1,7 @@
 package embgine.core;
 
 import embgine.core.renderers.ColorRenderer;
+import embgine.core.renderers.FontRenderer;
 import embgine.core.renderers.TextureRenderer;
 import embgine.graphics.Camera;
 import embgine.graphics.Shape;
@@ -17,6 +18,7 @@ public class Splash {
 	private Transform gt;
 	private ColorRenderer white;
 	private TextureRenderer logo;
+	private FontRenderer text;
 	
 	public Splash() {
 		camera = new Camera(16, 9);
@@ -44,7 +46,10 @@ public class Splash {
 		
 		white = new ColorRenderer(rect);
 		white.setColor(1, 1, 1, 1);
-		logo = new TextureRenderer(rect, new Texture("embgine/standard/logo.png"));
+		logo = new TextureRenderer(rect, new Texture("embgine/standard/logo.png", false));
+		text = new FontRenderer(rect, new Font(new Texture("embgine/standard/text.png", 16, 8), 9, 6), 0.75f, true, true, true);
+		text.setText(new char[][] {{'M','a','d','e',' ','W','i','t','h',' ','E','m','b','g','i','n','e'}});
+		text.setColor(0, 0, 0, 1);
 		
 		timer = SHOW_TIME;
 	}
@@ -56,13 +61,17 @@ public class Splash {
 	
 	public void render() {
 		
-		gt.setSize(16, 9);
+		gt.set(0, 0, 16, 9);
 		white.setTransform(gt);
 		white.render();
 		
-		gt.setSize(5, 5);
+		gt.set(0, -1, 5, 5);
 		logo.setTransform(gt);
 		logo.render();
+		
+		gt.setPosition(0, 2);
+		text.setTransform(gt);
+		text.render();
 		
 	}
 }

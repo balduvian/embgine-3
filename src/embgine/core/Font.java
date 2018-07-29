@@ -7,16 +7,22 @@ public class Font {
 	private Texture texture;
 	private int pixelWidth;
 	
-	private int[] widths;
+	private float width;
+	private float gWidth;
 	
-	public Font(Texture t, int pw, int[] ww) {
+	public Font(Texture t, int pw, int ww) {
 		texture = t;
 		pixelWidth = pw;
-		widths = ww;
+		width = ((float)ww/pixelWidth);
+		gWidth = ((float)1/pixelWidth);
 	}
 	
-	public float advance(char i) {
-		return ((float)widths[i]/pixelWidth);
+	public float getGutter() {
+		return gWidth;
+	}
+	
+	public float getWidth() {
+		return width;
 	}
 	
 	public Texture getTexture() {

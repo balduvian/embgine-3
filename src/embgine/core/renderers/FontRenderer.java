@@ -43,6 +43,14 @@ public class FontRenderer extends Renderer {
 		centeredT = (boolean)o[6];
 	}
 	
+	public void setColor(float r, float g, float b, float a) {
+		packet.setParams(r, g, b, a);
+	}
+
+	public void setText(char[][] c) {
+		characters = c;
+	}
+	
 	public void setText(String s) {
 		char[] initial = s.toCharArray();
 		ArrayList<ArrayList<Character>> temp = new ArrayList<ArrayList<Character>>();
@@ -88,12 +96,20 @@ public class FontRenderer extends Renderer {
 	
 	public void render() {
 		if(characters != null) {
+			
+			float gutterWidth = font.getGutter() * width;
+			
+			float advanceWidth = font.getWidth() * width;
+			
 			float startX;
 			float startY;
 			
 			Transform tp = new Transform(shape.getTransform());
 			
 			shape.getTransform().setSize(width, height);
+			
+			startX = tp.getX();
+			startY = tp.getY();
 			
 			if(!centeredW) {
 				if(!centeredH) {
@@ -113,7 +129,6 @@ public class FontRenderer extends Renderer {
 				}
 			}
 			
-			
 			preRender();
 			
 			int length = characters.length;
@@ -125,7 +140,7 @@ public class FontRenderer extends Renderer {
 				float x;
 				
 				if(centeredT) {
-					x = -((lineLength*width)/2f-width/2);
+					x = -( (lineLength * advanceWidth / 2) - (width / 2) - (gutterWidth / 2) );
 				}else {
 					x = 0;
 				}
@@ -146,7 +161,7 @@ public class FontRenderer extends Renderer {
 						renderRoutine(shape.getGuiMatrix());
 					}
 					
-					x += width*font.advance(c);
+					x += advanceWidth;
 					
 				}
 			}
