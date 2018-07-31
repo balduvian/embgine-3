@@ -10,7 +10,7 @@ import embgine.graphics.Transform;
 
 public class Splash {
 	
-	private static final int SHOW_TIME = 2;
+	private static final double SHOW_TIME = 0.5;
 	
 	private double timer;
 	private Camera camera;
@@ -69,7 +69,7 @@ public class Splash {
 		logo.setTransform(gt);
 		logo.render();
 		
-		gt.setPosition(0, 2);
+		gt.setPosition(0, 2.5f);
 		text.setTransform(gt);
 		text.render();
 		

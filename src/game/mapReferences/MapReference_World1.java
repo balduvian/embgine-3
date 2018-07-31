@@ -7,14 +7,13 @@ public class MapReference_World1 extends MapReference{
 	public MapReference_World1() {
 		super(
 			new int[] {
-				0x000000,
-				0x8b0000,
-				0xee9700,
-				0x193b04,
-				0xdef200,
-				0x004fc6,
-				0xdf4343,
-				0xdf00fd
+				0xff000000,
+				0xff8B0000,
+				0xffEE9700,
+				0xff193B04,
+				0xffDEF200,
+				0xff004FC6,
+				0xffDF4343
 			},
 			new String[] {
 				"Ground",

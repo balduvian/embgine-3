@@ -7,7 +7,7 @@ public class Font_Pixel extends Font{
 
 	public Font_Pixel() {
 		super(
-				new Texture("game/resources/textures/text.png"),
+				new Texture("game/textures/text.png"),
 				9,
 				6
 			);

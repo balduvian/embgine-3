@@ -1,5 +1,6 @@
 package game.maps;
 
+import embgine.core.GameObject;
 import embgine.core.MapScript;
 import embgine.core.Scene;
 
@@ -10,8 +11,11 @@ public class MapScript_Level1 extends MapScript{
 	}
 
 	public void start() {
-		scene.createEntity("Controller", 0, 0);
-		scene.createEntity("Player", 3, 14);
+		
+		GameObject player = scene.createEntity("Player", 3, 10);
+		
+		scene.createEntity("Controller", 0, 0, player);
+		
 	}
 
 }

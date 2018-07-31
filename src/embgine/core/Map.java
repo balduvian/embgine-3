@@ -41,8 +41,10 @@ public class Map {
 		
 		BufferedImage bi = null;
 		try {
-			bi = ImageIO.read(new File(mapPath));
-		} catch(Exception ex) {}
+			bi = ImageIO.read(this.getClass().getClassLoader().getResource(mapPath));
+		} catch(Exception ex) {
+			ex.printStackTrace();
+		}
 		
 		width = bi.getWidth();
 		height = bi.getHeight();
@@ -101,17 +103,22 @@ public class Map {
 		workingCopy = new Block[width][height];
 		for(int i = 0; i < width; ++i) {
 			for(int j = 0; j < height; ++j) {
-				try {
-					workingCopy[i][j] = tiles[i][j].create();
-				} catch (Exception ex) {
+				
+				if(tiles[i][j] == null) {
 					workingCopy[i][j] = null;
+				}else {
+					workingCopy[i][j] = tiles[i][j].create();
 				}
+				
 			}
 		}
 		
 		try {
-			scInstance = (MapScript)script.getClass().getConstructors()[0].newInstance(null, sc);
-		}catch(Exception ex) {}
+			scInstance = (MapScript)script.getConstructors()[0].newInstance(sc);
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			System.exit(-1);
+		}
 		
 		scInstance.start();
 	}

@@ -30,7 +30,7 @@ public class GameObject {
 		renderers = rs;
 		
 		try {
-			script = (Script)script.getClass().getConstructors()[0].newInstance(this, scene);
+			script = (Script)sc.getConstructors()[0].newInstance(this, scene);
 		} catch(Exception ex) {
 			script = null;
 		}

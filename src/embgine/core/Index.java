@@ -60,7 +60,7 @@ public class Index {
 		loadMapReferences(sc.getMapReferences());
 		loadMaps(sc.getMaps());
 		
-		sc.loadStartMap();
+		sc.initStartMap();
 		
 		sc.start();
 	}
@@ -198,15 +198,20 @@ public class Index {
 				//replace the shape string in the renderer template with the shape instance in here
 				template[1] = _getShape((String)template[1]);
 
-				//replace the shape string in the renderer template with the shape instance in here
+				//replace the font string in the renderer template with the font instance in here
+				//if it actually has a fontRenderer
 				if((Class<? extends Renderer>)template[0].getClass() == FontRenderer.class) {
 					template[2] = getFont((String)template[2]);
 				}
 				
 				try {
-					rList[j] = ((Class<? extends Renderer>)template[0]).getDeclaredConstructor(Object[].class).newInstance(template);
+					Object[] omega = {template};
+					
+					rList[j] = ((Class<? extends Renderer>)template[0]).getDeclaredConstructor(Object[].class).newInstance(omega);
+					
 				} catch (Exception ex) {
 					ex.printStackTrace();
+					System.exit(-1);
 				}
 			}
 

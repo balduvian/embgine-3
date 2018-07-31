@@ -4,14 +4,18 @@ import org.joml.Vector4f;
 
 import embgine.core.loaders.BlockLoader;
 import embgine.core.loaders.ObjectLoader;
+import embgine.graphics.Camera;
 import embgine.graphics.Packet;
 import embgine.graphics.Shape;
 import embgine.graphics.Texture;
+import embgine.graphics.Transform;
 import embgine.graphics.shaders.Shader;
 
 public class Scene {
 	
 	private static Index index;
+	
+	private static Camera camera; 
 	
 	private static Shape mapRect;
 	
@@ -37,6 +41,7 @@ public class Scene {
 		soundLoads  = sounds;
 		fontLoads   = fonts;
 		objectLoads = objects;
+		blockLoads = blocks;
 		mapReferenceLoads = refs;
 		mapLoads    = maps;
 		
@@ -48,15 +53,17 @@ public class Scene {
 		sortLayers[4] = new SortLayer();
 	}
 	
-	public void loadStartMap() {
-		startMap  = index.getMap(startMapName);
+	public void initStartMap() {
+		startMap = index.getMap(startMapName);
 	}
 	
 	public static void giveIndex(Index x) {
 		index = x;
 		
+		camera = index.getCamera();
+		
 		mapRect = new Shape(
-			index.getCamera(),
+			camera,
 			new float[] {
 	           0.5f, -0.5f, 0,
 	           0.5f,  0.5f, 0,
@@ -114,36 +121,55 @@ public class Scene {
 		sortLayers[0].render();
 		sortLayers[1].render();
 		
-		int width = currentMap.getWidth();
-		int height = currentMap.getHeight();
-		
-		Packet packet = new Packet(0);
+		Packet packet = new Packet(1, 1, 1, 1);
 		
 		mapRect.getTransform().setSize(1, 1);
 		Shader shader = Shader.TIL2DSHADER;
 		
-		for(int i = 0; i < width; ++i) {
-			for(int j = 0; j < height; ++j) {
+		Transform cameraTransform = camera.getTransform();
+		int x = Math.round(cameraTransform.getX());
+		int y = Math.round(cameraTransform.getY());
+		int gwHalf = (int) Math.ceil( index.getGameWidth() / 2);
+		int ghHalf = (int) Math.ceil(index.getGameHeight() / 2);
+		
+		int  left = x - gwHalf;
+		int right = x + gwHalf;
+		int    up = y - ghHalf;
+		int  down = y + ghHalf;
+		
+		//System.out.println("left: " + left + " right: " + right + " up: " + up + " down: " + down);
+		
+		for(int i = left; i <= right; ++i) {
+			for(int j = up; j <= down; ++j) {
 				Block b = currentMap.access(i, j);
-				Texture t = b.getTexture();
-				Vector4f frame = t.getFrame(b.getValue());
-				
-				packet.giveFrame(frame.x, frame.y, frame.z, frame.w);
-				t.bind();
-				mapRect.getTransform().setPosition(i, j);
-				
-				shader.enable(packet);
-				shader.setMvp(mapRect.getGuiMatrix());
-				mapRect.getVAO().render();
-				shader.disable();
-				
-				t.unbind();
+				if(b != null) {
+					
+					Texture t = b.getTexture();
+					Vector4f frame = t.getFrame(b.getValue());
+					
+					packet.giveFrame(frame.x, frame.y, frame.z, frame.w);
+					
+					mapRect.getTransform().setPosition(i, j);
+					
+					t.bind();
+					
+					shader.enable(packet);
+					shader.setMvp(mapRect.getMatrix());
+					mapRect.getVAO().render();
+					shader.disable();
+					
+					t.unbind();
+				}
 			}
 		}
 		
 		sortLayers[2].render();
 		sortLayers[3].render();
 		sortLayers[4].render();
+	}
+	
+	public Camera getCamera() {
+		return camera;
 	}
 	
 	public Map getMap() {

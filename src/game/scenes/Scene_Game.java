@@ -1,7 +1,13 @@
 package game.scenes;
 
 import embgine.core.Scene;
+import game.block.Block_Bricks;
+import game.block.Block_Bush;
 import game.block.Block_Ground;
+import game.block.Block_Pipe;
+import game.block.Block_Pole;
+import game.block.Block_Question;
+import game.block.Block_X;
 import game.fonts.Font_Pixel;
 import game.gameObjects.Entity_Controller;
 import game.gameObjects.Entity_Player;
@@ -25,7 +31,14 @@ public class Scene_Game extends Scene{
 				Entity_Player.class,
 			}, 
 			new Class[] {
+				Block_Bricks.class,
 				Block_Ground.class,
+				Block_Bush.class,
+				Block_Ground.class,
+				Block_Pipe.class,
+				Block_Pole.class,
+				Block_Question.class,
+				Block_X.class
 			},
 			new Class[] {
 				MapReference_World1.class,
