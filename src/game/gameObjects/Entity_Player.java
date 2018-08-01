@@ -9,10 +9,10 @@ public class Entity_Player extends ObjectLoader{
 
 	public Entity_Player() {
 		super(
-			0, 
-			0, 
-			true,
-			new Object[][] {{ TileRenderer.class, "Rect", new Texture("game/textures/player.png") }},
+			1, 
+			1, 
+			false,
+			new Object[][] {{ TileRenderer.class, "Rect", new Texture("game/textures/player.png", 3) }},
 			PlayerScript.class,
 			0
 		);

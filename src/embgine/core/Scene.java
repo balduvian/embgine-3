@@ -9,6 +9,7 @@ import embgine.graphics.Packet;
 import embgine.graphics.Shape;
 import embgine.graphics.Texture;
 import embgine.graphics.Transform;
+import embgine.graphics.Window;
 import embgine.graphics.shaders.Shader;
 
 public class Scene {
@@ -16,8 +17,8 @@ public class Scene {
 	private static Index index;
 	
 	private static Camera camera; 
-	
 	private static Shape mapRect;
+	private static Window window;
 	
 	private SortLayer[] sortLayers;
 	public static final int LAYERS = 5;
@@ -61,6 +62,8 @@ public class Scene {
 		index = x;
 		
 		camera = index.getCamera();
+		
+		window = index.getWindow();
 		
 		mapRect = new Shape(
 			camera,
@@ -166,6 +169,10 @@ public class Scene {
 		sortLayers[2].render();
 		sortLayers[3].render();
 		sortLayers[4].render();
+	}
+	
+	public Window getWindow() {
+		return window;
 	}
 	
 	public Camera getCamera() {

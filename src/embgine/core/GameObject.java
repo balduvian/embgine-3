@@ -10,6 +10,8 @@ public class GameObject {
 	
 	private Renderer[] renderers;
 	
+	private HitBox[] hitBoxes;
+	
 	private Script script;
 	private boolean enabled;
 
@@ -59,6 +61,7 @@ public class GameObject {
 	
 	public void render() {
 		if(enabled) {
+			
 			for(Renderer r : renderers) {
 				r.setGui(gui);
 				r.setTransform(transform);
@@ -117,6 +120,18 @@ public class GameObject {
 	
 	public Renderer getRenderer(int i) {
 		return renderers[i];
+	}
+	
+	public void initHitBoxes(int num) {
+		hitBoxes = new HitBox[num];
+	}
+	
+	public void giveHitBox(HitBox x, int i) {
+		hitBoxes[i] = x;
+	}
+	
+	public HitBox getHitBox(int i) {
+		return hitBoxes[i];
 	}
 	
 }

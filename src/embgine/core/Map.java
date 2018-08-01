@@ -15,6 +15,7 @@ public class Map {
 	private MapScript scInstance;
 	private Class<? extends MapScript> script;
 	private BlockLoader[][] tiles;
+	private int[][] tileValues;
 	private Block[][] workingCopy;
 	private BlockLoader edgeTile;
 	
@@ -50,6 +51,7 @@ public class Map {
 		height = bi.getHeight();
 		
 		tiles = new BlockLoader[width][height];
+		tileValues = new int[width][height];
 		
 		MapReference ref = index.getMapReference(refName);
 		
@@ -60,7 +62,23 @@ public class Map {
 		
 		//CREATE OUR THREADS
 		for(int i = 0; i < len; ++i) {
-			(threadList[i] = new Thread(new LoaderThread(keys[i], blocks[i], bi))).start();
+			(threadList[i] = new Thread(new PlacerThread(keys[i], blocks[i], bi))).start();
+		}
+		
+		//WAITS FOR THE THREADS TO DIE
+		for(int i = 0; i < len; ++i) {
+			try {
+				threadList[i].join();
+			} catch (InterruptedException ex) {
+				ex.printStackTrace();
+			}
+		}
+		
+		threadList = new Thread[len];
+		
+		//CREATE OUR THREADS
+		for(int i = 0; i < len; ++i) {
+			(threadList[i] = new Thread(new ValueThread(blocks[i]))).start();
 		}
 		
 		//WAITS FOR THE THREADS TO DIE
@@ -74,13 +92,13 @@ public class Map {
 		
 	}
 	
-	private class LoaderThread implements Runnable{
+	private class PlacerThread implements Runnable{
 		
 		int key;
 		BlockLoader block;
 		BufferedImage image;
 		
-		public LoaderThread(int k, BlockLoader b, BufferedImage i) {
+		public PlacerThread(int k, BlockLoader b, BufferedImage i) {
 			key = k;
 			block = b;
 			image = i;
@@ -98,8 +116,33 @@ public class Map {
 		
 	}
 	
-	public void refreshWorkingCopy(Scene sc) {
+	private class ValueThread implements Runnable{
 		
+		private BlockLoader block;
+		
+		public ValueThread(BlockLoader b) {
+			block = b;
+		}
+		
+		public void run() {
+			if(block.getTileable()) {
+				for(int i = 0; i < width; ++i) {
+					for(int j = 0; j < height; ++j) {
+						if(tiles[i][j] == block) {
+							tileValues[i][j] = block.getTile(isTile(i - 1, j, block), isTile(i - 1, j - 1, block), isTile(i, j - 1, block), isTile(i + 1, j - 1, block), isTile(i + 1, j, block), isTile(i + 1, j + 1, block), isTile(i, j + 1, block), isTile(i - 1, j + 1, block));
+						}
+					}
+				}
+			}
+		}
+		
+	}
+	
+	private int isTile(int x, int y, BlockLoader b) {
+		return (tiles[x][y] == b) ? 1 : 0;
+	}
+	
+	public void refreshWorkingCopy(Scene sc) {
 		workingCopy = new Block[width][height];
 		for(int i = 0; i < width; ++i) {
 			for(int j = 0; j < height; ++j) {
@@ -107,7 +150,7 @@ public class Map {
 				if(tiles[i][j] == null) {
 					workingCopy[i][j] = null;
 				}else {
-					workingCopy[i][j] = tiles[i][j].create();
+					(workingCopy[i][j] = (tiles[i][j].create())).setValue(tileValues[i][j]);
 				}
 				
 			}

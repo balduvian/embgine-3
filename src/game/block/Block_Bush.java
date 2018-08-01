@@ -6,7 +6,11 @@ import embgine.graphics.Texture;
 public class Block_Bush extends BlockLoader{
 
 	public Block_Bush() {
-		super(false, new Texture("game/textures/block_bush.png", 3));
+		super(false, new Texture("game/textures/block_bush.png", 3), true);
+		
+		setTile(1, 1, 0, 0, 0, 1, 0, 0, 0);
+		
+		setTile(2, 1, 0, 0, 0, 0, 0, 0, 0);
 	}
 
 }
