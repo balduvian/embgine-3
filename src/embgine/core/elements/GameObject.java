@@ -19,7 +19,9 @@ public class GameObject extends Element{
 	public GameObject(Transform transform, ObjectScript script, boolean enabled, int type, Renderer[] rs, boolean g, int l) {
 		super(transform, script, enabled, type);
 		
-		script.setParent(this);
+		if(script != null) {
+			script.setParent(this);
+		}
 		
 		renderers = rs;
 		

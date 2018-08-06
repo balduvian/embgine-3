@@ -17,7 +17,7 @@ public class GameScript extends SceneScript{
 	
 	public void start(Object... params) { 
 		
-		playerLoader = parent.getObjectLoader("player");
+		playerLoader = parent.getObjectLoader("Player");
 		camera = parent.getCamera();
 		gameHeight = parent.getGameHeight();
 		gameWidth = parent.getGameWidth();
@@ -48,7 +48,7 @@ public class GameScript extends SceneScript{
 	}
 
 	public void makePlayer(float x, float y) {
-		playerLoader.create(scene, x, y, true);
+		player = scene.createObject(playerLoader, x, y, true);
 	}
 	
 }

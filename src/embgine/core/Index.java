@@ -23,7 +23,6 @@ public class Index {
 	
 	private HashMap<String, Scene       >        _sceneMap;
 	private HashMap<String, Shape       >        _shapeMap;
-	private HashMap<String, Global<?>   >       _globalMap;
 	private HashMap<String, Sound       >         soundMap;
 	private HashMap<String, Font        >          fontMap;
 	private HashMap<String, ObjectLoader>  objectLoaderMap;
@@ -51,7 +50,6 @@ public class Index {
 		
 		_loadScenes();
 		_loadShapes();
-		_loadGlobals();
 	}
 	
 	public void sceneLoad(Scene sc) {
@@ -97,22 +95,6 @@ public class Index {
 			try {
 				Shape instance = ((ShapeLoader)cl.getConstructors()[0].newInstance()).create();
 				_shapeMap.put(Utils.getHashName(cl), instance);
-			} catch(Exception ex) {
-				ex.printStackTrace();
-			}
-		}
-	}
-	
-	private void _loadGlobals() {
-		@SuppressWarnings("unchecked")
-		Class<? extends Global<?>>[] classes = (Class<? extends Global<?>>[])Utils.getClasses("game/globals");
-		int len = classes.length;
-		_globalMap = new HashMap<String, Global<?>>(len, 1.0f);
-		for(int i = 0; i < len; ++i) {
-			Class<? extends Global<?>> cl = classes[i];
-			try {
-				Global<?> instance = (Global<?>)cl.getConstructors()[0].newInstance();
-				_globalMap.put(Utils.getHashName(cl), instance);
 			} catch(Exception ex) {
 				ex.printStackTrace();
 			}
@@ -312,10 +294,6 @@ public class Index {
 	
 	public Shape _getShape(String str) {
 		return _shapeMap.get(str);
-	}
-	
-	public Global<?> _getGlobal(String str) {
-		return _globalMap.get(str);
 	}
 	
 	public Sound getSound(String str) {

@@ -26,11 +26,28 @@ public class Manager{
 		full = false;
 	}
 	
-	public void update(Camera c) {
+	public Element[] onScreenUpdate(Camera camera) {
+		int length = 0;
+		Element[] temp = new Element[size];
+		for(int i = 0; i < last; ++i) {
+			Element e = collection[i];
+			if(e != null && e.onScreenUpdate(camera)) {
+				temp[length] = e;
+				++length;
+			}
+		}
+		Element[] ret = new Element[length];
+		for(int i = 0; i < length; ++i) {
+			ret[i] = temp[i];
+		}
+		return ret;
+	}
+	
+	public void update() {
 		for(int i = 0; i < last; ++i) {
 			Element e = collection[i];
 			if(e != null) {
-				e.update(c);
+				e.update();
 			}
 		}
 	}
@@ -51,8 +68,8 @@ public class Manager{
 			
 			collection[first] = o;
 			
-			if(last < first) {
-				last = first;
+			if(last < first + 1) {
+				last = first + 1;
 			}
 			
 			forwardFirst(first + 1);
@@ -86,14 +103,6 @@ public class Manager{
 				}
 			}
 			full = true;
-		}
-	}
-	
-	public void clearType(Class<? extends Element> e) {
-		for(int i = 0; i < last; ++i) {
-			if(collection[i].getClass() == e) {
-				remove(i);
-			}
 		}
 	}
 	

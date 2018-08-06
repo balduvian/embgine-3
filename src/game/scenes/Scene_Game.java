@@ -12,6 +12,7 @@ import game.fonts.Font_Pixel;
 import game.gameObjects.Entity_Player;
 import game.mapReferences.MapReference_World1;
 import game.maps.Map_Level1;
+import game.master.MarioMaster;
 import game.scripts.GameScript;
 import game.scripts.Level1Script;
 
@@ -22,8 +23,9 @@ public class Scene_Game extends Scene{
 		super(
 			GameScript.class,
 			Level1Script.class,
-			4,
+			MarioMaster.GAMELAYERS,
 			16,
+			1,
 			new String[] {
 				"game/sounds/Hex.wav",
 			}, 

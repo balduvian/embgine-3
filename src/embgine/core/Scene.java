@@ -28,7 +28,8 @@ public class Scene {
 	
 	private StateScript<SceneScript> initialState;
 	
-	private Manager manager;
+	private Manager objectManager;
+	private Manager mapManager;
 	
 	private int layers;
 	
@@ -36,24 +37,28 @@ public class Scene {
 	
 	private SceneScript script;
 	
+	private Element[] currentObjects;
+	private Element[] currentMaps;
+	
 	@SuppressWarnings("unchecked")
-	public Scene(Class<? extends SceneScript> sceneScript, Class<? extends StateScript<?>> stateScript, int numLayers, int managerSize, String[] sounds, Class<? extends Font>[] fonts, Class<? extends ObjectLoader>[] objects, Class<? extends BlockLoader>[] blocks, Class<? extends MapReference>[] refs, Class<? extends MapLoader>[] maps) {
+	public Scene(Class<? extends SceneScript> sceneScript, Class<? extends StateScript<?>> stateScript, int numLayers, int maxObjects, int maxMaps, String[] sounds, Class<? extends Font>[] fonts, Class<? extends ObjectLoader>[] objects, Class<? extends BlockLoader>[] blocks, Class<? extends MapReference>[] refs, Class<? extends MapLoader>[] maps) {
 	
 		try {
-			script = (SceneScript)sceneScript.getConstructors()[0].newInstance(this);
+			script = (SceneScript)sceneScript.getConstructors()[0].newInstance();
 			script.setScene(this);
 			script.setParent(index);
 		} catch (Exception ex) { }
 		
 		try {
-			initialState = (StateScript<SceneScript>)stateScript.getConstructors()[0].newInstance(this);
+			initialState = (StateScript<SceneScript>)stateScript.getConstructors()[0].newInstance();
 			initialState.setScene(this);
 			initialState.setParent(script);
 		} catch (Exception ex) { }
 		
 		layers = numLayers;
 		
-		manager = new Manager(managerSize);
+		objectManager = new Manager(maxObjects);
+		mapManager = new Manager(maxMaps);
 		
 		soundLoads  = sounds;
 		fontLoads   = fonts;
@@ -74,11 +79,11 @@ public class Scene {
 	}
 	
 	public void resetObjects() {
-		manager.clearType(GameObject.class);
+		objectManager.clear();
 	}
 	
 	public void resetMaps() {
-		manager.clearType(Map.class);
+		mapManager.clear();
 	}
 	
 	public void resetAll() {
@@ -87,18 +92,24 @@ public class Scene {
 	}
 	
 	public String update() {
+		
+		currentObjects = objectManager.onScreenUpdate(camera);
+		currentMaps = mapManager.onScreenUpdate(camera);
+		
 		switchValue = null;
 		
 		script.update();
 		
-		manager.update(camera);	
+		objectManager.update();	
+		mapManager.update();
 		
 		return switchValue;
 	}
 	
 	public void render() {
 		for(int l = 0; l < layers; ++l) {
-			manager.render(l);
+			mapManager.render(l);
+			objectManager.render(l);
 		}
 	}
 	
@@ -106,22 +117,21 @@ public class Scene {
 		return index;
 	}
 	
-	public Manager getManager() {
-		return manager;
+	public void destroyObject(GameObject o) {
+		objectManager.remove(o.getIndex());
 	}
 	
-	public void destroy(Element o) {
-		manager.remove(o.getIndex());
+	public void destroyMap(Map o) {
+		mapManager.remove(o.getIndex());
 	}
 	
 	public void switchScene(String s) {
 		switchValue = s;
 	}
 	
-	public GameObject createObject(ObjectLoader loader, float x, float y, int layer, boolean e, Object... params) {
+	public GameObject createObject(ObjectLoader loader, float x, float y, boolean e, Object... params) {
 		GameObject ret = loader.create(this, x, y, e);
-		manager.add(ret);
-		ret.setLayer(layer);
+		objectManager.add(ret);
 		ObjectScript os = (ObjectScript)ret.getScript();
 		if(os != null) {
 			ret.getScript().start(params);
@@ -131,7 +141,7 @@ public class Scene {
 	
 	public Map createMap(MapLoader loader, float x, float y, boolean e, Object... params) {
 		Map ret = loader.create(this, x, y, e);
-		manager.add(ret);
+		mapManager.add(ret);
 		MapScript ms = (MapScript)ret.getScript();
 		if(ms != null) {
 			ret.getScript().start(params);
@@ -152,6 +162,14 @@ public class Scene {
 	
 	public Script<Index> getScript() {
 		return script;
+	}
+	
+	public Element[] getCurrentObjects() {
+		return currentObjects;
+	}
+	
+	public Element[] getCurrentMaps() {
+		return currentMaps;
 	}
 	
 	/*

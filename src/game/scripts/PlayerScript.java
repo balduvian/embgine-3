@@ -65,6 +65,13 @@ public class PlayerScript extends ObjectScript{
 
 	@Override
 	public void update() {
+		
+		try {
+			map = (Map)scene.getCurrentMaps()[0];
+		}catch(Exception ex) {
+			
+		}
+		
 		((TileRenderer)parent.getRenderer(0)).giveFrame(0);
 		
 		getInput();

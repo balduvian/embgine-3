@@ -14,6 +14,7 @@ public class Level1Script extends StateScript<GameScript>{
 		level1 = scene.getIndex().getMapLoader("Level1");
 				
 		scene.createMap(level1, 0, 0, true);
+
 	}
 
 }

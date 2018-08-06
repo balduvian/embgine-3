@@ -72,26 +72,30 @@ abstract public class Element {
 		script.start();
 	}
 	
-	public void update(Camera camera) {
+	public boolean onScreenUpdate(Camera camera) {
+		if(enabled) {
+			float ex = transform.     getX()    ;
+			float ey = transform.     getY()    ;
+			float ew = transform. getWidth() / 2;
+			float eh = transform.getHeight() / 2;
+			
+			Transform cTransform = camera.getTransform();
+			
+			float cx = cTransform.     getX()    ;
+			float cy = cTransform.     getY()    ;
+			float cw = cTransform. getWidth() / 2;
+			float ch = cTransform.getHeight() / 2;
+			
+			onScreen = (ex + ew > cx - cw) && (ex - ew < cx + cw) && (ey + eh > cy - ch) && (ey - eh < cy + ch);
+			return onScreen;
+		}
+		return false;
+	}
+	
+	public void update() {
 		if(enabled && script != null) {
 			script.update();
 		}
-		
-		//determine onscreen
-		
-		float ex = transform.     getX()    ;
-		float ey = transform.     getY()    ;
-		float ew = transform. getWidth() / 2;
-		float eh = transform.getHeight() / 2;
-		
-		Transform cTransform = camera.getTransform();
-		
-		float cx = cTransform.     getX()    ;
-		float cy = cTransform.     getY()    ;
-		float cw = cTransform. getWidth() / 2;
-		float ch = cTransform.getHeight() / 2;
-		
-		onScreen = (ex + ew > cx - cw) && (ex - ew < cx + cw) && (ey + eh > cy - ch) && (ey - eh < cy + ch);
 	}
 	
 	public void render(int layer) {

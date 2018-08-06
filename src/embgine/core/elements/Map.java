@@ -31,9 +31,14 @@ public class Map extends Element{
 	public Map(Transform transform, MapScript script, boolean enabled, int type, Block[][] m, boolean edge, BlockLoader tile) {
 		super(transform, script, enabled, type);
 		
-		script.setParent(this);
+		if(script != null) {
+			script.setParent(this);
+		}
 		
 		map = m;
+		
+		mapWidth = map.length;
+		mapHeight = map[0].length;
 		
 		edgeMode = edge;
 		edgeTile = tile;
@@ -83,7 +88,7 @@ public class Map extends Element{
 		for(int i = left; i <= right; ++i) {
 			for(int j = up; j <= down; ++j) {
 				Block b = access(i, j);
-				if(b != null) {
+				if(b != null && b.getLayer() == layer) {
 					
 					Texture t = b.getTexture();
 					Vector4f frame = t.getFrame(b.getValue());

@@ -1,5 +1,6 @@
 package embgine.core;
 
+import embgine.core.scripts.Master;
 import embgine.graphics.ALManagement;
 import embgine.graphics.Camera;
 import embgine.graphics.Window;
@@ -22,6 +23,7 @@ public class Base{
 	
 	private int frameRate;
 	
+	private Master master;
 	private float gameWidth;
 	private float gameHeight;
 	private String name;
@@ -41,6 +43,13 @@ public class Base{
 			@SuppressWarnings("unchecked")
 			Class<? extends GameData>[] gameDataClass = (Class<? extends GameData>[])Utils.getClasses("game/gameData"); 
 			GameData gd = (GameData)gameDataClass[0].getConstructors()[0].newInstance();
+			
+			try {
+				master = gd.master.newInstance();
+			} catch(Exception ex) {
+				ex.printStackTrace();
+				System.exit(-1);
+			}
 			
 			gameWidth = gd.width;
 			gameHeight = gd.height;
@@ -64,6 +73,8 @@ public class Base{
 			
 			splash = new Splash();
 			intro = true;
+			
+			master.beginGame();
 			
 			//start the game loop
 			gameLoop();

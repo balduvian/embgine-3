@@ -55,9 +55,10 @@ public class MapLoader {
 		
 		MapScript sInstance = null;
 		try {
-			sInstance = (MapScript)script.getConstructors()[0].newInstance(scene);
+			sInstance = (MapScript)script.getConstructors()[0].newInstance();
 			sInstance.setScene(scene);
-		} catch(Exception ex) { }
+		} catch(Exception ex) { 
+		}
 		
 		Transform transform = new Transform(x, y, mapWidth, mapHeight);
 		

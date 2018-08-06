@@ -9,24 +9,20 @@ public class Block {
 	
 	private int value;
 	
-	private Block(Block b) {
-		solid = b.solid;
-		if(b.texture != null) {
-			texture = b.texture;
-		}
-	}
+	private int layer;
 	
-	public Block(boolean s, Texture t) {
+	public Block(boolean s, Texture t, int l) {
 		solid = s;
 		texture = t;
+		layer = l;
 	}
 	
 	public boolean isSolid() {
 		return solid;
 	}
 	
-	public Block create() {
-		return new Block(this);
+	public int getLayer() {
+		return layer;
 	}
 	
 	public void setValue(int v) {
