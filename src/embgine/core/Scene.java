@@ -1,211 +1,157 @@
 package embgine.core;
 
-import org.joml.Vector4f;
-
+import embgine.core.elements.Element;
+import embgine.core.elements.GameObject;
+import embgine.core.elements.Map;
 import embgine.core.loaders.BlockLoader;
+import embgine.core.loaders.MapLoader;
 import embgine.core.loaders.ObjectLoader;
+import embgine.core.scripts.MapScript;
+import embgine.core.scripts.ObjectScript;
+import embgine.core.scripts.SceneScript;
+import embgine.core.scripts.Script;
+import embgine.core.scripts.StateScript;
 import embgine.graphics.Camera;
-import embgine.graphics.Packet;
-import embgine.graphics.Shape;
-import embgine.graphics.Texture;
-import embgine.graphics.Transform;
-import embgine.graphics.Window;
-import embgine.graphics.shaders.Shader;
+import embgine.graphics.Sound;
 
 public class Scene {
 	
 	private static Index index;
-	
-	private static Camera camera; 
-	private static Shape mapRect;
-	private static Window window;
-	
-	private SortLayer[] sortLayers;
-	public static final int LAYERS = 5;
-	
-	private Map currentMap;
-	
-	private String startMapName;
-	private Map startMap;
-	
-	private String switchValue;
+	private static Camera camera;
 	
 	private                        String[]  soundLoads;
 	private Class<? extends         Font>[]   fontLoads;
 	private Class<? extends ObjectLoader>[] objectLoads;
 	private Class<? extends  BlockLoader>[]  blockLoads;
 	private Class<? extends MapReference>[] mapReferenceLoads;
-	private Class<? extends          Map>[]    mapLoads;
+	private Class<? extends    MapLoader>[]    mapLoads;
 	
-	public Scene(String sl, String[] sounds, Class<? extends Font>[] fonts, Class<? extends ObjectLoader>[] objects, Class<? extends BlockLoader>[] blocks, Class<? extends MapReference>[] refs, Class<? extends Map>[] maps) {
-		startMapName = sl;
+	private StateScript<SceneScript> initialState;
+	
+	private Manager manager;
+	
+	private int layers;
+	
+	private String switchValue;
+	
+	private SceneScript script;
+	
+	@SuppressWarnings("unchecked")
+	public Scene(Class<? extends SceneScript> sceneScript, Class<? extends StateScript<?>> stateScript, int numLayers, int managerSize, String[] sounds, Class<? extends Font>[] fonts, Class<? extends ObjectLoader>[] objects, Class<? extends BlockLoader>[] blocks, Class<? extends MapReference>[] refs, Class<? extends MapLoader>[] maps) {
+	
+		try {
+			script = (SceneScript)sceneScript.getConstructors()[0].newInstance(this);
+			script.setScene(this);
+			script.setParent(index);
+		} catch (Exception ex) { }
+		
+		try {
+			initialState = (StateScript<SceneScript>)stateScript.getConstructors()[0].newInstance(this);
+			initialState.setScene(this);
+			initialState.setParent(script);
+		} catch (Exception ex) { }
+		
+		layers = numLayers;
+		
+		manager = new Manager(managerSize);
+		
 		soundLoads  = sounds;
 		fontLoads   = fonts;
 		objectLoads = objects;
 		blockLoads = blocks;
 		mapReferenceLoads = refs;
 		mapLoads    = maps;
-		
-		sortLayers = new SortLayer[LAYERS];
-		sortLayers[0] = new SortLayer();
-		sortLayers[1] = new SortLayer();
-		sortLayers[2] = new SortLayer();
-		sortLayers[3] = new SortLayer();
-		sortLayers[4] = new SortLayer();
 	}
 	
-	public void initStartMap() {
-		startMap = index.getMap(startMapName);
-	}
-	
-	public static void giveIndex(Index x) {
+	public static void setup(Index x) {
 		index = x;
-		
 		camera = index.getCamera();
-		
-		window = index.getWindow();
-		
-		mapRect = new Shape(
-			camera,
-			new float[] {
-	           0.5f, -0.5f, 0,
-	           0.5f,  0.5f, 0,
-	           -0.5f,  0.5f, 0,
-	           -0.5f, -0.5f, 0
-			}, new int[] {
-				0, 1, 3,
-				1, 2, 3
-			}, new float[] {
-		        1, 0,
-		        1, 1,
-		        0, 1,
-		        0, 0
-			}
-		);
-	}
-	
-	public void start(String mapName) {
-		sortLayers[0].clear();
-		sortLayers[1].clear();
-		sortLayers[2].clear();
-		sortLayers[3].clear();
-		sortLayers[4].clear();
-		
-		currentMap = index.getMap(mapName);
-		
-		currentMap.refreshWorkingCopy(this);
 	}
 	
 	public void start() {
-		sortLayers[0].clear();
-		sortLayers[1].clear();
-		sortLayers[2].clear();
-		sortLayers[3].clear();
-		sortLayers[4].clear();
-		
-		currentMap = startMap;
-		
-		currentMap.refreshWorkingCopy(this);
+		script.start();
+		initialState.start();
+	}
+	
+	public void resetObjects() {
+		manager.clearType(GameObject.class);
+	}
+	
+	public void resetMaps() {
+		manager.clearType(Map.class);
+	}
+	
+	public void resetAll() {
+		resetObjects();
+		resetMaps();
 	}
 	
 	public String update() {
-		
 		switchValue = null;
 		
-		for(int i = LAYERS-1; i > -1; --i) {
-			sortLayers[i].update();
-		}		
+		script.update();
+		
+		manager.update(camera);	
 		
 		return switchValue;
 	}
 	
 	public void render() {
-		
-		sortLayers[0].render();
-		sortLayers[1].render();
-		
-		Packet packet = new Packet(1, 1, 1, 1);
-		
-		mapRect.getTransform().setSize(1, 1);
-		Shader shader = Shader.TIL2DSHADER;
-		
-		Transform cameraTransform = camera.getTransform();
-		int x = Math.round(cameraTransform.getX());
-		int y = Math.round(cameraTransform.getY());
-		int gwHalf = (int) Math.ceil( index.getGameWidth() / 2);
-		int ghHalf = (int) Math.ceil(index.getGameHeight() / 2);
-		
-		int  left = x - gwHalf;
-		int right = x + gwHalf;
-		int    up = y - ghHalf;
-		int  down = y + ghHalf;
-		
-		//System.out.println("left: " + left + " right: " + right + " up: " + up + " down: " + down);
-		
-		for(int i = left; i <= right; ++i) {
-			for(int j = up; j <= down; ++j) {
-				Block b = currentMap.access(i, j);
-				if(b != null) {
-					
-					Texture t = b.getTexture();
-					Vector4f frame = t.getFrame(b.getValue());
-					
-					packet.giveFrame(frame.x, frame.y, frame.z, frame.w);
-					
-					mapRect.getTransform().setPosition(i, j);
-					
-					t.bind();
-					
-					shader.enable(packet);
-					shader.setMvp(mapRect.getMatrix());
-					mapRect.getVAO().render();
-					shader.disable();
-					
-					t.unbind();
-				}
-			}
+		for(int l = 0; l < layers; ++l) {
+			manager.render(l);
 		}
-		
-		sortLayers[2].render();
-		sortLayers[3].render();
-		sortLayers[4].render();
 	}
 	
-	public Window getWindow() {
-		return window;
+	public Index getIndex() {
+		return index;
 	}
 	
-	public Camera getCamera() {
-		return camera;
+	public Manager getManager() {
+		return manager;
 	}
 	
-	public Map getMap() {
-		return currentMap;
-	}
-	
-	public void destroy(GameObject o) {
-		sortLayers[o.getLayer()].remove(o.getIndex());
+	public void destroy(Element o) {
+		manager.remove(o.getIndex());
 	}
 	
 	public void switchScene(String s) {
 		switchValue = s;
 	}
 	
-	public GameObject createEntity(String o, float x, float y, Object... params) {
-		GameObject ret = index.getObject(this, o);
-		sortLayers[ret.getLayer()].add(ret);
-		ret.getTransform().setPosition(x, y);
-		ret.getScript().start(params);
+	public GameObject createObject(ObjectLoader loader, float x, float y, int layer, boolean e, Object... params) {
+		GameObject ret = loader.create(this, x, y, e);
+		manager.add(ret);
+		ret.setLayer(layer);
+		ObjectScript os = (ObjectScript)ret.getScript();
+		if(os != null) {
+			ret.getScript().start(params);
+		}
 		return ret;
 	}
 	
-	public void sendForward(GameObject o) {
-		sortLayers[o.getLayer()].sendForward(o.getIndex());
+	public Map createMap(MapLoader loader, float x, float y, boolean e, Object... params) {
+		Map ret = loader.create(this, x, y, e);
+		manager.add(ret);
+		MapScript ms = (MapScript)ret.getScript();
+		if(ms != null) {
+			ret.getScript().start(params);
+		}
+		return ret;
 	}
 	
-	public void soundEffect(String s, float v) {
-		index.getSound(s).setVolume(v);
-		index.getSound(s).play(false);
+	public Sound sound(String s, float v, boolean r) {
+		Sound sound = index.getSound(s);
+		sound.setVolume(v);
+		sound.play(r);
+		return sound;
+	}
+	
+	public void stopSound(Sound s) {
+		s.stop();
+	}
+	
+	public Script<Index> getScript() {
+		return script;
 	}
 	
 	/*
@@ -234,8 +180,8 @@ public class Scene {
 		return mapReferenceLoads;
 	}
 	
-	public Class<? extends Map>[] getMaps() {
+	public Class<? extends MapLoader>[] getMaps() {
 		return mapLoads;
 	}
-
+	
 }

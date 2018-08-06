@@ -14,7 +14,7 @@ public class Entity_Player extends ObjectLoader{
 			false,
 			new Object[][] {{ TileRenderer.class, "Rect", new Texture("game/textures/player.png", 3) }},
 			PlayerScript.class,
-			0
+			2
 		);
 	}
 

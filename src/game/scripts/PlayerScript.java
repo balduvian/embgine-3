@@ -2,19 +2,17 @@ package game.scripts;
 
 import embgine.core.Base;
 import embgine.core.Block;
-import embgine.core.GameObject;
 import embgine.core.HitBox;
-import embgine.core.Map;
+import embgine.core.Index;
 import embgine.core.Scene;
-import embgine.core.Script;
+import embgine.core.elements.GameObject;
+import embgine.core.elements.Map;
 import embgine.core.renderers.TileRenderer;
+import embgine.core.scripts.ObjectScript;
+import embgine.core.scripts.Script;
 import embgine.graphics.Window;
 
-public class PlayerScript extends Script{
-
-	public PlayerScript(GameObject p, Scene s) {
-		super(p, s);
-	}
+public class PlayerScript extends ObjectScript{
 	
 	public static final int W = 87;
 	public static final int A = 65;
@@ -46,9 +44,10 @@ public class PlayerScript extends Script{
 	
 	public void start(Object... params) {
 		
-		input = scene.getWindow();
-		map = scene.getMap();
+		Index ind = scene.getIndex();
 		
+		input = ind.getWindow();
+
 		animFrame = 0;
 		
 		xMax = 7f;

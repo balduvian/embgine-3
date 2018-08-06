@@ -1,12 +1,11 @@
 package game.maps;
 
-import embgine.core.Map;
-import game.mapReferences.MapReference_World1;
+import embgine.core.loaders.MapLoader;
 
-public class Map_Level1 extends Map{
+public class Map_Level1 extends MapLoader{
 
 	public Map_Level1() {
-		super("game/maps/map_level1.png", "World1", Map.EDGE_REPEAT, null, MapScript_Level1.class);
+		super("game/textures/map_level1.png", "World1", null, EDGE_REPEAT, null);
 	}
 
 }

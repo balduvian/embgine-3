@@ -1,9 +1,10 @@
 package embgine.core;
 
 import java.util.HashMap;
-import java.util.Set;
 
+import embgine.core.elements.Map;
 import embgine.core.loaders.BlockLoader;
+import embgine.core.loaders.MapLoader;
 import embgine.core.loaders.ObjectLoader;
 import embgine.core.loaders.ShapeLoader;
 import embgine.core.renderers.FontRenderer;
@@ -28,7 +29,7 @@ public class Index {
 	private HashMap<String, ObjectLoader>  objectLoaderMap;
 	private HashMap<String, BlockLoader >         blockMap;
 	private HashMap<String, MapReference>  mapReferenceMap;
-	private HashMap<String, Map         >           mapMap;
+	private HashMap<String, MapLoader   >     mapLoaderMap;
 	
 	private float gameWidth;
 	private float gameHeight;
@@ -44,8 +45,9 @@ public class Index {
 		window = w;
 		audio = a;
 		
-		Scene.giveIndex(this);
+		Scene.setup(this);
 		ShapeLoader.giveCamera(camera);
+		Map.setup(this);
 		
 		_loadScenes();
 		_loadShapes();
@@ -59,8 +61,6 @@ public class Index {
 		loadBlocks(sc.getBlocks());
 		loadMapReferences(sc.getMapReferences());
 		loadMaps(sc.getMaps());
-		
-		sc.initStartMap();
 		
 		sc.start();
 	}
@@ -215,9 +215,7 @@ public class Index {
 				}
 			}
 
-			loader.giveRenderers(rList);
-			
-			loader.giveType(i);
+			loader.setup(rList, i);
 			
 			objectLoaderMap.put(Utils.getHashName(oc), loader);
 		}
@@ -253,14 +251,15 @@ public class Index {
 		}
 	}
 	
-	private void loadMaps(Class<? extends Map>[] maps) {
+	private void loadMaps(Class<? extends MapLoader>[] maps) {
 		int len = maps.length;
-		mapMap = new HashMap<String, Map>(len, 1.0f);
-		for(Class<? extends Map> cl : maps) {
+		mapLoaderMap = new HashMap<String, MapLoader>(len, 1.0f);
+		for(int i = 0; i < len; ++i) {
 			try {
-				Map m = (Map)cl.getConstructors()[0].newInstance();
-				m.init(this);
-				mapMap.put(Utils.getHashName(cl), m);
+				Class<? extends MapLoader> mc = maps[i];
+				MapLoader m = (MapLoader)mc.getConstructors()[0].newInstance();
+				m.init(this, i);
+				mapLoaderMap.put(Utils.getHashName(mc), m);
 			} catch(Exception ex) {
 				ex.printStackTrace();
 			}
@@ -308,13 +307,6 @@ public class Index {
 	*/
 	
 	public Scene _getScene(String str) {
-		/*
-		Set<String> p = _sceneMap.keySet();
-		for(String s : p) {
-			System.out.println(s);
-		}
-		System.exit(0);
-		*/
 		return _sceneMap.get(str);
 	}
 	
@@ -334,10 +326,6 @@ public class Index {
 		return fontMap.get(str);
 	}
 	
-	public GameObject getObject(Scene sc, String str) {
-		return objectLoaderMap.get(str).create(sc);
-	}
-	
 	public ObjectLoader getObjectLoader(String str) {
 		return objectLoaderMap.get(str);
 	}
@@ -354,7 +342,7 @@ public class Index {
 		return mapReferenceMap.get(str);
 	}
 	
-	public Map getMap(String str) {
-		return mapMap.get(str);
+	public MapLoader getMapLoader(String str) {
+		return mapLoaderMap.get(str);
 	}
 }

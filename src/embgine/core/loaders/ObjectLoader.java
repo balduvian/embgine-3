@@ -1,9 +1,10 @@
 package embgine.core.loaders;
 
-import embgine.core.GameObject;
 import embgine.core.Scene;
-import embgine.core.Script;
+import embgine.core.elements.GameObject;
 import embgine.core.renderers.Renderer;
+import embgine.core.scripts.ObjectScript;
+import embgine.graphics.Transform;
 
 abstract public class ObjectLoader {
 	
@@ -11,12 +12,12 @@ abstract public class ObjectLoader {
 	private float height;
 	private boolean gui;
 	private Object[][] rTemplates;
-	private Class<? extends Script> script;
-	private int layer;
+	private Class<? extends ObjectScript> script;
 	private Renderer[] renderers;
 	private int type;
+	private int layer;
 	
-	public ObjectLoader(float w, float h, boolean g, Object[][] r, Class<? extends Script> s, int l) {
+	public ObjectLoader(float w, float h, boolean g, Object[][] r, Class<? extends ObjectScript> s, int l) {
 		width      = w;
 		height     = h;
 		gui        = g;
@@ -25,32 +26,31 @@ abstract public class ObjectLoader {
 		layer      = l;
 	}
 	
-	public GameObject create(Scene scene) {
-		try {
-			
-			int num = renderers.length;
-			Renderer[] cloneRenderers = new Renderer[num];
-			for(int i = 0; i < num; ++i) {
-				cloneRenderers[i] = renderers[i].clone();
-			}
-			
-			return new GameObject(width, height, cloneRenderers, gui, script, layer, type, scene);
-			
-		} catch(Exception ex) {
-			ex.printStackTrace();
-			return null;
+	public GameObject create(Scene scene, float x, float y, boolean enabled) {
+		
+		int num = renderers.length;
+		Renderer[] cloneRenderers = new Renderer[num];
+		for(int i = 0; i < num; ++i) {
+			cloneRenderers[i] = renderers[i].clone();
 		}
+		
+		ObjectScript sInstance = null;
+		try {
+			sInstance = (ObjectScript)script.getConstructors()[0].newInstance();
+			sInstance.setScene(scene);
+		} catch(Exception ex) { }
+		
+		Transform transform = new Transform(x, y, width, height);
+		
+		return new GameObject(transform, sInstance, enabled, type, cloneRenderers, gui, layer);
 	}
 	
 	public Object[][] getTemplates() {
 		return rTemplates;
 	}
 	
-	public void giveRenderers(Renderer[] r) {
+	public void setup(Renderer[] r, int t) {
 		renderers = r;
-	}
-	
-	public void giveType(int t) {
 		type = t;
 	}
 	
