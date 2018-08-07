@@ -3,9 +3,9 @@ package embgine.core.renderers;
 import org.joml.Matrix4f;
 
 import embgine.graphics.Packet;
-import embgine.graphics.Shape;
 import embgine.graphics.Transform;
 import embgine.graphics.shaders.Shader;
+import embgine.graphics.shapes.Shape;
 
 abstract public class Renderer {
 	

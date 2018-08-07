@@ -3,9 +3,9 @@ package embgine.core.renderers;
 import org.joml.Vector4f;
 
 import embgine.graphics.Packet;
-import embgine.graphics.Shape;
 import embgine.graphics.Texture;
 import embgine.graphics.shaders.Shader;
+import embgine.graphics.shapes.Shape;
 
 public class TileRenderer extends Renderer{
 	

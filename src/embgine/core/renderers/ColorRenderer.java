@@ -1,8 +1,8 @@
 package embgine.core.renderers;
 
 import embgine.graphics.Packet;
-import embgine.graphics.Shape;
 import embgine.graphics.shaders.Shader;
+import embgine.graphics.shapes.Shape;
 
 public class ColorRenderer extends Renderer{
 	

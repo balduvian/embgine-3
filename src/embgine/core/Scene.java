@@ -44,10 +44,13 @@ public class Scene {
 	public Scene(Class<? extends SceneScript> sceneScript, Class<? extends StateScript<?>> stateScript, int numLayers, int maxObjects, int maxMaps, String[] sounds, Class<? extends Font>[] fonts, Class<? extends ObjectLoader>[] objects, Class<? extends BlockLoader>[] blocks, Class<? extends MapReference>[] refs, Class<? extends MapLoader>[] maps) {
 	
 		try {
-			script = (SceneScript)sceneScript.getConstructors()[0].newInstance();
+			script = (SceneScript)sceneScript.newInstance();
 			script.setScene(this);
 			script.setParent(index);
-		} catch (Exception ex) { }
+		} catch (Exception ex) { 
+			ex.printStackTrace();
+			System.exit(-1);
+		}
 		
 		try {
 			initialState = (StateScript<SceneScript>)stateScript.getConstructors()[0].newInstance();

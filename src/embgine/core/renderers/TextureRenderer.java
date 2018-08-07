@@ -1,9 +1,9 @@
 package embgine.core.renderers;
 
 import embgine.graphics.Packet;
-import embgine.graphics.Shape;
 import embgine.graphics.Texture;
 import embgine.graphics.shaders.Shader;
+import embgine.graphics.shapes.Shape;
 
 public class TextureRenderer extends Renderer{
 	

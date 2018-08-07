@@ -8,10 +8,10 @@ import embgine.core.loaders.BlockLoader;
 import embgine.core.scripts.MapScript;
 import embgine.graphics.Camera;
 import embgine.graphics.Packet;
-import embgine.graphics.Shape;
 import embgine.graphics.Texture;
 import embgine.graphics.Transform;
 import embgine.graphics.shaders.Shader;
+import embgine.graphics.shapes.Shape;
 
 public class Map extends Element{
 	
@@ -49,23 +49,7 @@ public class Map extends Element{
 		
 		camera = index.getCamera();
 		
-		mapRect = new Shape(
-			camera,
-			new float[] {
-	           0.5f, -0.5f, 0,
-	           0.5f,  0.5f, 0,
-	           -0.5f,  0.5f, 0,
-	           -0.5f, -0.5f, 0
-			}, new int[] {
-				0, 1, 3,
-				1, 2, 3
-			}, new float[] {
-		        1, 0,
-		        1, 1,
-		        0, 1,
-		        0, 0
-			}
-		);
+		mapRect = Shape.RECT;
 		
 		packet = new Packet(1, 1, 1, 1);
 	}

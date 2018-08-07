@@ -1,10 +1,12 @@
 package embgine.core;
 
+import embgine.core.elements.Map;
 import embgine.core.scripts.Master;
 import embgine.graphics.ALManagement;
 import embgine.graphics.Camera;
 import embgine.graphics.Window;
 import embgine.graphics.shaders.Shader;
+import embgine.graphics.shapes.Shape;
 
 public class Base{
 
@@ -36,13 +38,9 @@ public class Base{
 	}
 	
 	private Base() {
-		
 		try {
-			//make a bufferedReader to read the index.txt at its designated location
-			
-			@SuppressWarnings("unchecked")
-			Class<? extends GameData>[] gameDataClass = (Class<? extends GameData>[])Utils.getClasses("game/gameData"); 
-			GameData gd = (GameData)gameDataClass[0].getConstructors()[0].newInstance();
+			Class<?> gameDataClass = this.getClass().getClassLoader().loadClass("game.gameData.GameData_Game"); 
+			GameData gd = (GameData)gameDataClass.newInstance();
 			
 			try {
 				master = gd.master.newInstance();
@@ -54,7 +52,7 @@ public class Base{
 			gameWidth = gd.width;
 			gameHeight = gd.height;
 			name = gd.gameName;
-			firstScene = gd.firstScene;
+			firstScene = Utils.getHashName(gd.sceneList[0]);
 			debugMode = gd.debugMode;
 			fullScreen = gd.fullScreen;
 			
@@ -67,9 +65,11 @@ public class Base{
 			
 			audio = new ALManagement();
 			
+			//static inits b4 index
+			Shape.init(camera);
 			Shader.init();
-				
-			index = new Index(gameWidth, gameHeight, name, debugMode, camera, window, audio);
+			
+			index = new Index(gameWidth, gameHeight, name, debugMode, camera, window, audio, gd.sceneList);
 			
 			splash = new Splash();
 			intro = true;

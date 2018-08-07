@@ -8,18 +8,18 @@ public abstract class GameData {
 	public float width;
 	public float height;
 	public String gameName;
-	public String firstScene;
 	public boolean debugMode;
 	public boolean fullScreen;
+	public Class<? extends Scene>[] sceneList;
 	
-	public GameData(Class<? extends Master> ma, float w, float h, String gn, String fs, boolean dm, boolean fu) {
+	public GameData(Class<? extends Master> ma, float w, float h, String gn, boolean dm, boolean fu, Class<? extends Scene>[] sl) {
 		master = ma;
 		width = w;
 		height = h;
 		gameName = gn;
-		firstScene = fs;
 		debugMode = dm;
 		fullScreen = fu;
+		sceneList = sl;
 	}
 	
 }

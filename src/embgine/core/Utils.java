@@ -1,8 +1,5 @@
 package embgine.core;
 
-import java.io.File;
-import java.util.ArrayList;
-
 public class Utils {
 
 	public static final float PI = 3.1415927f;
@@ -18,26 +15,6 @@ public class Utils {
 	public static float random() {
 		return (float) Math.random();
 	}
-	
-	public static Class<?>[] getClasses(String packageName){
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        assert classLoader != null;
-        File directory = new File(classLoader.getResource(packageName).getFile());
-        ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
-
-        File[] files = directory.listFiles();
-        for (File file : files) {
-            if (file.getName().endsWith(".class")) {
-                try {
-					classes.add(Class.forName(packageName.replace('/', '.') + '.' + file.getName().substring(0, file.getName().length() - 6)));
-				} catch (ClassNotFoundException ex) {
-					ex.printStackTrace();
-				}
-            }
-        }
-        
-        return classes.toArray(new Class[classes.size()]);
-    }
 	
 	public static String getHashName(Class<?> cl) {
 		String nam = cl.getSimpleName();

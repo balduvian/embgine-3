@@ -4,9 +4,9 @@ import embgine.core.renderers.ColorRenderer;
 import embgine.core.renderers.FontRenderer;
 import embgine.core.renderers.TextureRenderer;
 import embgine.graphics.Camera;
-import embgine.graphics.Shape;
 import embgine.graphics.Texture;
 import embgine.graphics.Transform;
+import embgine.graphics.shapes.Shape;
 
 public class Splash {
 	
@@ -24,23 +24,7 @@ public class Splash {
 		camera = new Camera(16, 9);
 		camera.update();
 		
-		Shape rect = new Shape(
-			camera,
-			new float[] {
-	           0.5f, -0.5f, 0,
-	           0.5f,  0.5f, 0,
-	           -0.5f,  0.5f, 0,
-	           -0.5f, -0.5f, 0
-			}, new int[] {
-				0, 1, 3,
-				1, 2, 3
-			}, new float[] {
-		        1, 0,
-		        1, 1,
-		        0, 1,
-		        0, 0
-			}
-		);
+		Shape rect = Shape.RECT;
 		
 		gt = new Transform(0, 0, 0, 0, 0);
 		

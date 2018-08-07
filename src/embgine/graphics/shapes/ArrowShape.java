@@ -1,10 +1,8 @@
-package game.shapes;
+package embgine.graphics.shapes;
 
-import embgine.core.loaders.ShapeLoader;
+public class ArrowShape extends Shape{
 
-public class Shape_Arrow extends ShapeLoader{
-
-	public Shape_Arrow() {
+	public ArrowShape() {
 		super(
 				new float[] {
 				    0f, -0.5f, 0,

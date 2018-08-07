@@ -1,10 +1,8 @@
-package game.shapes;
+package embgine.graphics.shapes;
 
-import embgine.core.loaders.ShapeLoader;
+public class RectShape extends Shape{
 
-public class Shape_Rect extends ShapeLoader{
-
-	public Shape_Rect() {
+	public RectShape() {
 		super(
 				new float[] {
 		           0.5f, -0.5f, 0,

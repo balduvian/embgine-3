@@ -1,21 +1,34 @@
-package embgine.graphics;
+package embgine.graphics.shapes;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-public class Shape {
+import embgine.graphics.Camera;
+import embgine.graphics.Transform;
+import embgine.graphics.VAO;
+
+abstract public class Shape {
 	
-	private Camera camera;
+	public static RectShape RECT;
+	public static ArrowShape ARROW;
+	
+	private static Camera camera;
 	
 	private VAO vao;
 	
 	private Transform transform;
 	
-	public Shape(Camera c, float vertices[], int[] indices, float[] texCoords) {
-		camera = c;
+	public Shape(float vertices[], int[] indices, float[] texCoords) {
 		transform = new Transform();
 		vao = new VAO(vertices, indices);
 		vao.addAttrib(texCoords, 2);
+	}
+	
+	public static void init(Camera c) {
+		camera = c;
+		
+		RECT = new RectShape();
+		ARROW = new ArrowShape();
 	}
 	
 	public Matrix4f getMatrix() {

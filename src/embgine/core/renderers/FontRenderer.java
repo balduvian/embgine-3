@@ -6,9 +6,9 @@ import org.joml.Vector4f;
 
 import embgine.core.Font;
 import embgine.graphics.Packet;
-import embgine.graphics.Shape;
 import embgine.graphics.Transform;
 import embgine.graphics.shaders.Shader;
+import embgine.graphics.shapes.Shape;
 
 public class FontRenderer extends Renderer {
 	

@@ -6,14 +6,13 @@ import embgine.core.elements.Map;
 import embgine.core.loaders.BlockLoader;
 import embgine.core.loaders.MapLoader;
 import embgine.core.loaders.ObjectLoader;
-import embgine.core.loaders.ShapeLoader;
 import embgine.core.renderers.FontRenderer;
 import embgine.core.renderers.Renderer;
 import embgine.graphics.ALManagement;
 import embgine.graphics.Camera;
-import embgine.graphics.Shape;
 import embgine.graphics.Sound;
 import embgine.graphics.Window;
+import embgine.graphics.shapes.Shape;
 
 public class Index {
 
@@ -22,7 +21,6 @@ public class Index {
 	private ALManagement audio;
 	
 	private HashMap<String, Scene       >        _sceneMap;
-	private HashMap<String, Shape       >        _shapeMap;
 	private HashMap<String, Sound       >         soundMap;
 	private HashMap<String, Font        >          fontMap;
 	private HashMap<String, ObjectLoader>  objectLoaderMap;
@@ -35,7 +33,7 @@ public class Index {
 	private String gameName;
 	private boolean debug;
 	
-	public Index(float gw, float gh, String n, boolean db, Camera c, Window w, ALManagement a) {
+	public Index(float gw, float gh, String n, boolean db, Camera c, Window w, ALManagement a, Class<? extends Scene>[] sc) {
 		gameWidth = gw;
 		gameHeight = gh;
 		gameName = n;
@@ -45,11 +43,9 @@ public class Index {
 		audio = a;
 		
 		Scene.setup(this);
-		ShapeLoader.giveCamera(camera);
 		Map.setup(this);
 		
-		_loadScenes();
-		_loadShapes();
+		_loadScenes(sc);
 	}
 	
 	public void sceneLoad(Scene sc) {
@@ -69,35 +65,22 @@ public class Index {
 	#################################################################################
 	*/
 	
-	private void _loadScenes() {
-		@SuppressWarnings("unchecked")
-		Class<? extends Scene>[] classes = (Class<? extends Scene>[])Utils.getClasses("game/scenes");
-		int len = classes.length;
+	private void _loadScenes(Class<? extends Scene>[] scenes) {
+		int len = scenes.length;
 		_sceneMap = new HashMap<String, Scene>(len, 1.0f);
 		for(int i = 0; i < len; ++i) {
-			Class<? extends Scene> cl = classes[i];
+			
+			Class<? extends Scene> fc = scenes[i];
+			
+			Scene f = null;
+			
 			try {
-				Scene instance = (Scene)cl.getConstructors()[0].newInstance();
-				_sceneMap.put(Utils.getHashName(cl), instance);
-			} catch(Exception ex) {
+				f = (Scene)fc.newInstance();
+			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
-		}
-	}
-	
-	protected void _loadShapes() {
-		@SuppressWarnings("unchecked")
-		Class<? extends ShapeLoader>[] classes = (Class<? extends ShapeLoader>[])Utils.getClasses("game/shapes");
-		int len = classes.length;
-		_shapeMap = new HashMap<String, Shape>(len, 1.0f);
-		for(int i = 0; i < len; ++i) {
-			Class<? extends ShapeLoader> cl = classes[i];
-			try {
-				Shape instance = ((ShapeLoader)cl.getConstructors()[0].newInstance()).create();
-				_shapeMap.put(Utils.getHashName(cl), instance);
-			} catch(Exception ex) {
-				ex.printStackTrace();
-			}
+			
+			_sceneMap.put(Utils.getHashName(fc), f);
 		}
 	}
 	
@@ -176,9 +159,6 @@ public class Index {
 			
 			for(int j = 0; j < numRenderers; ++j) {
 				Object[] template = templateList[j];
-				
-				//replace the shape string in the renderer template with the shape instance in here
-				template[1] = _getShape((String)template[1]);
 
 				//replace the font string in the renderer template with the font instance in here
 				//if it actually has a fontRenderer
@@ -290,10 +270,6 @@ public class Index {
 	
 	public Scene _getScene(String str) {
 		return _sceneMap.get(str);
-	}
-	
-	public Shape _getShape(String str) {
-		return _shapeMap.get(str);
 	}
 	
 	public Sound getSound(String str) {
