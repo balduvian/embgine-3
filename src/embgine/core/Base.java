@@ -1,10 +1,12 @@
 package embgine.core;
 
+import embgine.core.elements.GameObject;
 import embgine.core.elements.Map;
 import embgine.core.scripts.Master;
 import embgine.graphics.ALManagement;
 import embgine.graphics.Camera;
 import embgine.graphics.Window;
+import embgine.graphics.infos.Info;
 import embgine.graphics.shaders.Shader;
 import embgine.graphics.shapes.Shape;
 
@@ -67,11 +69,13 @@ public class Base{
 			
 			//static inits b4 index
 			Shape.init(camera);
+			GameObject.init(camera);
 			Shader.init();
+			Info.init();
 			
 			index = new Index(gameWidth, gameHeight, name, debugMode, camera, window, audio, gd.sceneList);
 			
-			splash = new Splash();
+			splash = new Splash(camera);
 			intro = true;
 			
 			master.beginGame();
@@ -105,8 +109,8 @@ public class Base{
 			long now = System.nanoTime();
 			if(now-last > usingFPS) {
 				time = (now-last)/1000000000d;
-				render();
 				update();
+				render();
 				window.swap();
 				last = now; 
 				++frames;
@@ -115,7 +119,7 @@ public class Base{
 				fps = frames; 
 				frames = 0;
 				lastSec = now;
-				//System.out.println(fps);
+				System.out.println(fps);
 			}
 		}
 		audio.destroy();

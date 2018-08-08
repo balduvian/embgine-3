@@ -3,8 +3,6 @@ package embgine.graphics.shaders;
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glUniform4f;
 
-import embgine.graphics.Packet;
-
 import static org.lwjgl.opengl.GL20.glUniform2f;
 
 public class Noi2DShader extends Shader {
@@ -13,7 +11,7 @@ public class Noi2DShader extends Shader {
 	private int inPosLoc;
 	
 	protected Noi2DShader() {
-		super("embgine/shaders/noi2d.vs", "embgine/shaders/noi2d.fs");
+		super("embgine/shaders/noi2d.vs", "embgine/shaders/noi2d.fs", 6);
 	}
 	
 	protected void getUniforms() {
@@ -22,8 +20,8 @@ public class Noi2DShader extends Shader {
 	}
 
 	@Override
-	protected void subRoutine(Packet p) {
-		glUniform4f(passColorLoc, p.x, p.y, p.z, p.w);
-		glUniform2f(inPosLoc, p.p[0], p.p[1]);
+	protected void subRoutine(float[] p) {
+		glUniform4f(passColorLoc, p[2], p[3], p[4], p[5]);
+		glUniform2f(inPosLoc, p[0], p[1]);
 	}
 }

@@ -2,12 +2,11 @@ package game.scripts;
 
 import embgine.core.Base;
 import embgine.core.Block;
-import embgine.core.HitBox;
 import embgine.core.Index;
 import embgine.core.Scene;
+import embgine.core.components.HitBox;
 import embgine.core.elements.GameObject;
 import embgine.core.elements.Map;
-import embgine.core.renderers.TileRenderer;
 import embgine.core.scripts.ObjectScript;
 import embgine.core.scripts.Script;
 import embgine.graphics.Window;
@@ -59,8 +58,6 @@ public class PlayerScript extends ObjectScript{
 		grav = 0.5f;
 		air = true;
 		
-		parent.initHitBoxes(1);
-		parent.giveHitBox( HitBox.createT(0, 0, 0.5f, 1), 0);
 	}
 
 	@Override
@@ -71,8 +68,6 @@ public class PlayerScript extends ObjectScript{
 		}catch(Exception ex) {
 			
 		}
-		
-		((TileRenderer)parent.getRenderer(0)).giveFrame(0);
 		
 		getInput();
 		gravity();
@@ -159,7 +154,7 @@ public class PlayerScript extends ObjectScript{
 	//stops the player from moving if they're gonna hit a wall
 	private void collisionCheck() {
 		
-		HitBox collBox = parent.getHitBox(0);
+		HitBox collBox = (HitBox) parent.getComponent(1);
 		
 		float nowX = parent.getTransform().getX();
 		float nowY = parent.getTransform().getY();

@@ -12,6 +12,7 @@ import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL15.glBufferData;
 import static org.lwjgl.opengl.GL15.glDeleteBuffers;
 import static org.lwjgl.opengl.GL15.glGenBuffers;
+import static org.lwjgl.opengl.GL11.GL_LINES;
 import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
@@ -19,15 +20,18 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
+import org.lwjgl.opengl.GL11;
+
 public class VAO {
 	
+	private int mode;
 	private int numAttribs;
 	private int ibo;
 	private int vao;
 	private int count;
 	private int[] vbos = new int[15];
 	
-	public VAO(float[] vertices, int[] indices) {
+	public VAO(float[] vertices, int[] indices, int drawMode) {
 		vao = glGenVertexArrays();
 		glBindVertexArray(vao);
 		addAttrib(vertices, 3);
@@ -37,6 +41,8 @@ public class VAO {
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
 		
 		count = indices.length;
+		
+		mode = drawMode;
 	}
 	
 	public void addAttrib(float[] f, int s) {
@@ -53,7 +59,7 @@ public class VAO {
 		for(int i = 0; i < numAttribs; ++i) {
 			glEnableVertexAttribArray(i);
 		}
-		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
+		glDrawElements(mode, count, GL_UNSIGNED_INT, 0);
 		for(int i = 0; i < numAttribs; ++i) {
 			glDisableVertexAttribArray(i);
 		}

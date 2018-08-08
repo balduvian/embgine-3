@@ -1,7 +1,9 @@
 package game.gameObjects;
 
+import embgine.core.components.Component;
+import embgine.core.components.HitBox;
+import embgine.core.components.TilRenderer;
 import embgine.core.loaders.ObjectLoader;
-import embgine.core.renderers.TileRenderer;
 import embgine.graphics.Texture;
 import embgine.graphics.shapes.Shape;
 import game.master.MarioMaster;
@@ -14,7 +16,10 @@ public class Entity_Player extends ObjectLoader{
 			1, 
 			1, 
 			false,
-			new Object[][] {{ TileRenderer.class, Shape.RECT, new Texture("game/textures/player.png", 3) }},
+			new Component[] {
+				new TilRenderer(Shape.RECT, true, new Texture("game/textures/player.png", 3)),
+				HitBox.createT(0, 0, 0.5f, 1f),
+			},
 			PlayerScript.class,
 			MarioMaster.LAYER_GAME
 		);

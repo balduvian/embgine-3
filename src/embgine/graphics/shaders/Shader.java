@@ -8,8 +8,6 @@ import java.io.InputStreamReader;
 
 import org.joml.Matrix4f;
 
-import embgine.graphics.Packet;
-
 abstract public class Shader {
 	
 	public static Til2DShader TIL2DSHADER;
@@ -24,6 +22,8 @@ abstract public class Shader {
 	
 	protected int mvpLoc;
 	
+	protected int numParams;
+	
 	public static void init() {
 		COL2DSHADER = new Col2DShader();
 		TIL2DSHADER = new Til2DShader();
@@ -34,7 +34,7 @@ abstract public class Shader {
 		TEX2DSHADER = new Tex2DShader();
 	}
 	
-	protected Shader(String vertPath, String fragPath) {
+	protected Shader(String vertPath, String fragPath, int numP) {
 		program = glCreateProgram();
 		int vert = loadShader(vertPath, GL_VERTEX_SHADER);
 		int frag = loadShader(fragPath, GL_FRAGMENT_SHADER);
@@ -47,6 +47,8 @@ abstract public class Shader {
 		glDeleteShader(frag);
 		
 		mvpLoc = glGetUniformLocation(program, "mvp");
+		
+		numParams = numP;
 		
 		getUniforms();
 	}
@@ -82,13 +84,13 @@ abstract public class Shader {
 	}
 	
 	//render with passing information
-	public void enable(Packet p) {
+	public void enable(float[] p) {
 		glUseProgram(program);
 		subRoutine(p);
 	}
 	
 	//this is what each shader uses to pass information into the shader
-	abstract protected void subRoutine(Packet p);
+	abstract protected void subRoutine(float[] p);
 	
 	//run the shader without passing anything or calling the sub routine
 	public void enable() {
@@ -103,4 +105,7 @@ abstract public class Shader {
 		glDeleteProgram(program);
 	}
 	
+	public int getNumParams() {
+		return numParams;
+	}
 }

@@ -95,6 +95,7 @@ abstract public class Element {
 	public void update() {
 		if(enabled && script != null) {
 			script.update();
+			subUpdate();
 		}
 	}
 	
@@ -103,6 +104,8 @@ abstract public class Element {
 			subRender(layer);
 		}
 	}
+	
+	public abstract void subUpdate();
 	
 	public abstract void subRender(int layer);
 	

@@ -6,8 +6,6 @@ import embgine.core.elements.Map;
 import embgine.core.loaders.BlockLoader;
 import embgine.core.loaders.MapLoader;
 import embgine.core.loaders.ObjectLoader;
-import embgine.core.renderers.FontRenderer;
-import embgine.core.renderers.Renderer;
 import embgine.graphics.ALManagement;
 import embgine.graphics.Camera;
 import embgine.graphics.Sound;
@@ -136,7 +134,6 @@ public class Index {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void loadGameObjects(Class<? extends ObjectLoader>[] objects) {
 
 		int len = objects.length;
@@ -148,36 +145,10 @@ public class Index {
 					
 			ObjectLoader loader = null;
 			try {
-				loader = (ObjectLoader)oc.getConstructors()[0].newInstance();
+				loader = (ObjectLoader)oc.newInstance();
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
-			
-			Object[][] templateList = loader.getTemplates();
-			int numRenderers = templateList.length;
-			Renderer[] rList = new Renderer[numRenderers];
-			
-			for(int j = 0; j < numRenderers; ++j) {
-				Object[] template = templateList[j];
-
-				//replace the font string in the renderer template with the font instance in here
-				//if it actually has a fontRenderer
-				if((Class<? extends Renderer>)template[0].getClass() == FontRenderer.class) {
-					template[2] = getFont((String)template[2]);
-				}
-				
-				try {
-					Object[] omega = {template};
-					
-					rList[j] = ((Class<? extends Renderer>)template[0]).getDeclaredConstructor(Object[].class).newInstance(omega);
-					
-				} catch (Exception ex) {
-					ex.printStackTrace();
-					System.exit(-1);
-				}
-			}
-
-			loader.setup(rList, i);
 			
 			objectLoaderMap.put(Utils.getHashName(oc), loader);
 		}

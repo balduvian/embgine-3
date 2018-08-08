@@ -7,7 +7,6 @@ import embgine.core.Index;
 import embgine.core.loaders.BlockLoader;
 import embgine.core.scripts.MapScript;
 import embgine.graphics.Camera;
-import embgine.graphics.Packet;
 import embgine.graphics.Texture;
 import embgine.graphics.Transform;
 import embgine.graphics.shaders.Shader;
@@ -16,9 +15,9 @@ import embgine.graphics.shapes.Shape;
 public class Map extends Element{
 	
 	private static Index index;
+	private static Shader shader;
 	private static Camera camera;
 	private static Shape mapRect;
-	private static Packet packet;
 	
 	private Block[][] map;
 	private BlockLoader edgeTile;
@@ -51,12 +50,11 @@ public class Map extends Element{
 		
 		mapRect = Shape.RECT;
 		
-		packet = new Packet(1, 1, 1, 1);
+		shader = Shader.TIL2DSHADER;
 	}
 	
 	public void subRender(int layer) {
 		mapRect.getTransform().setSize(1, 1);
-		Shader shader = Shader.TIL2DSHADER;
 		
 		Transform cameraTransform = camera.getTransform();
 		int x = Math.round(cameraTransform.getX());
@@ -77,13 +75,11 @@ public class Map extends Element{
 					Texture t = b.getTexture();
 					Vector4f frame = t.getFrame(b.getValue());
 					
-					packet.giveFrame(frame.x, frame.y, frame.z, frame.w);
-					
 					mapRect.getTransform().setPosition(i, j);
 					
 					t.bind();
 					
-					shader.enable(packet);
+					shader.enable(new float[] {frame.x, frame.y, frame.z, frame.w, 1f, 1f, 1f, 1f});
 					shader.setMvp(mapRect.getMatrix());
 					mapRect.getVAO().render();
 					shader.disable();
@@ -138,6 +134,10 @@ public class Map extends Element{
 	
 	public void setBlock(Block b, int x, int y) {
 		map[x][y] = b;
+	}
+
+	public void subUpdate() {
+		script.update();
 	}
 	
 }

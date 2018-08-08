@@ -3,8 +3,6 @@ package embgine.graphics.shaders;
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glUniform4f;
 
-import embgine.graphics.Packet;
-
 import static org.lwjgl.opengl.GL20.glUniform1f;
 
 public class Rai2DShader extends Shader {
@@ -16,7 +14,7 @@ public class Rai2DShader extends Shader {
 	private double timer;//used internally
 	
 	public Rai2DShader() {
-		super("embgine/shaders/rai2d.vs", "embgine/shaders/rai2d.fs");
+		super("embgine/shaders/rai2d.vs", "embgine/shaders/rai2d.fs", 6);
 		
 	}
 	
@@ -27,11 +25,11 @@ public class Rai2DShader extends Shader {
 	}
 
 	@Override
-	protected void subRoutine(Packet p) {
-		glUniform4f(texLoc, p.x, p.y, p.z, p.w);
-		glUniform1f(enableLoc, p.p[0]);
+	protected void subRoutine(float[] p) {
+		glUniform4f(texLoc, p[2], p[3], p[4], p[5]);
+		glUniform1f(enableLoc, p[0]);
 		
-		timer = (p.p[0]) % (Math.PI*2);
+		timer = (p[1]) % (Math.PI*2);
 		
 		glUniform1f(colorLoc, (float)timer);
 	}

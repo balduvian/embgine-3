@@ -1,16 +1,14 @@
-package embgine.core.renderers;
+package embgine.graphics.infos;
 
 import java.util.ArrayList;
 
 import org.joml.Vector4f;
 
 import embgine.core.Font;
-import embgine.graphics.Packet;
 import embgine.graphics.Transform;
 import embgine.graphics.shaders.Shader;
-import embgine.graphics.shapes.Shape;
 
-public class FontRenderer extends Renderer {
+public class FonInfo extends Info {
 	
 	private char[][] characters;
 	private boolean centeredW;
@@ -19,36 +17,28 @@ public class FontRenderer extends Renderer {
 	private float width, height;
 	private Font font;
 	
-	public Renderer clone() {
-		return new FontRenderer(shape, font, width, centeredW, centeredH, centeredT);
+	public FonInfo() {
+		super(Shader.TIL2DSHADER);
 	}
 	
-	public FontRenderer(Shape sp, Font f, float s, boolean cw, boolean ch, boolean ct) {
-		super(sp, Shader.TIL2DSHADER, new Packet(1, 1, 1, 1));
+	public void setColor(float r, float g, float b, float a) {
+		setPacket(4, r);
+		setPacket(5, g);
+		setPacket(6, b);
+		setPacket(7, a);
+	}
+
+	public void setText(char[][] c) {
+		characters = c;
+	}
+	
+	public void setParams(Font f, float s, boolean cw, boolean ch, boolean ct) {
 		font = f;
 		width = s;
 		height = s;
 		centeredW = cw;
 		centeredH = ch;
 		centeredT = ct;
-	}
-	
-	public FontRenderer(Object[] o) {
-		super((Shape)o[1], Shader.TIL2DSHADER, new Packet(1, 1, 1, 1));
-		font = (Font)o[2];
-		width = (float)o[3];
-		height = (float)o[3];
-		centeredW = (boolean)o[4];
-		centeredH = (boolean)o[5];
-		centeredT = (boolean)o[6];
-	}
-	
-	public void setColor(float r, float g, float b, float a) {
-		packet.setParams(r, g, b, a);
-	}
-
-	public void setText(char[][] c) {
-		characters = c;
 	}
 	
 	public void setText(String s) {
@@ -151,15 +141,14 @@ public class FontRenderer extends Renderer {
 					
 					Vector4f frame = font.getTexture().getFrame(c%16, c/16);
 
-					packet.giveFrame(frame.x, frame.y, frame.z, frame.w);
+					setPacket(0, frame.x);
+					setPacket(1, frame.y);
+					setPacket(2, frame.z);
+					setPacket(3, frame.w);
 					
 					shape.getTransform().setPosition(startX+x, startY+height*i);
 					
-					if(gui) {
-						renderRoutine(shape.getMatrix());
-					}else {
-						renderRoutine(shape.getGuiMatrix());
-					}
+					renderRoutine(shape.getMatrix());
 					
 					x += advanceWidth;
 					

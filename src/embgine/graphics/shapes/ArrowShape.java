@@ -17,7 +17,8 @@ public class ArrowShape extends Shape{
 					1, 0,
 					0.5f, 0.25f,
 					0, 0
-				}
+				},
+				Shape.TRIANGLES
 		);
 	}
 

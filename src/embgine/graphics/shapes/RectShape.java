@@ -17,7 +17,8 @@ public class RectShape extends Shape{
 			        1, 1,
 			        0, 1,
 			        0, 0
-				}
+				},
+				Shape.TRIANGLES
 		);
 	}
 	

@@ -1,42 +1,62 @@
 package embgine.core.elements;
 
-import embgine.core.HitBox;
-import embgine.core.Scene;
-import embgine.core.renderers.Renderer;
+import embgine.core.components.Component;
+import embgine.core.components.HitBox;
 import embgine.core.scripts.ObjectScript;
-import embgine.core.scripts.Script;
+import embgine.graphics.Camera;
 import embgine.graphics.Transform;
 
 public class GameObject extends Element{
 	
-	private Renderer[] renderers;
-	private HitBox[] hitBoxes;
+	private static Camera camera;
+	
+	private int numComponents;
+	private Component[] components;
 	
 	private boolean gui;
 	
 	private int layer;
 	
-	public GameObject(Transform transform, ObjectScript script, boolean enabled, int type, Renderer[] rs, boolean g, int l) {
+	public GameObject(Transform transform, ObjectScript script, boolean enabled, int type, Component[] componentList, boolean g, int l) {
 		super(transform, script, enabled, type);
 		
 		if(script != null) {
 			script.setParent(this);
 		}
 		
-		renderers = rs;
+		components = componentList;
+		numComponents = components.length;
+		
+		for(int i = 0; i < numComponents; ++i) {
+			components[i].setParent(this);
+		}
 		
 		gui = g;
 		
 		layer = l;
 	}
 	
+	public static void init(Camera c) {
+		camera = c;
+	}
+	
+	public void subUpdate() {
+		for(int i = 0; i < numComponents; ++i) {
+			components[i].update();
+		}
+		if(gui) {
+			transform.move(camera.getTransform().getX(), camera.getTransform().getY());
+		}
+	}
+	
 	public void subRender(int l) {
 		if(layer == l) {
-			for(Renderer r : renderers) {
-				r.setGui(gui);
-				r.setTransform(transform);
-				r.render();
+			for(int i = 0; i < numComponents; ++i) {
+				components[i].render();
 			}
+		}
+		if(gui) {
+			transform.move(-camera.getTransform().getX(), -camera.getTransform().getY());
 		}
 	}
 	
@@ -48,20 +68,14 @@ public class GameObject extends Element{
 		return gui;
 	}
 	
-	public Renderer getRenderer(int i) {
-		return renderers[i];
+	public Component getComponent(int i) {
+		return components[i];
 	}
 	
-	public void initHitBoxes(int num) {
-		hitBoxes = new HitBox[num];
-	}
-	
-	public void giveHitBox(HitBox x, int i) {
-		hitBoxes[i] = x;
-	}
-	
-	public HitBox getHitBox(int i) {
-		return hitBoxes[i];
+	public void replaceComponent(Component x, int i) {
+		components[i] = x;
+		x.setParent(this);
+		x.update();
 	}
 
 	public void setLayer(int l) {
