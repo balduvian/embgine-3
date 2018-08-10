@@ -13,6 +13,7 @@ import embgine.core.scripts.Script;
 import embgine.core.scripts.StateScript;
 import embgine.graphics.Camera;
 import embgine.graphics.Sound;
+import embgine.graphics.Transform;
 
 public class Scene {
 	
@@ -101,15 +102,22 @@ public class Scene {
 		
 		switchValue = null;
 		
-		script.update();
-		
 		objectManager.update();	
 		mapManager.update();
+		
+		script.update();
+		
+		
+		Transform ct = camera.getTransform();
+		float x = Math.round(ct.getX());
+		float y = Math.round(ct.getY());
+		camera.getTransform().set(new Transform(x, y, ct.getWidth(), ct.getHeight()));
 		
 		return switchValue;
 	}
 	
 	public void render() {
+		
 		for(int l = 0; l < layers; ++l) {
 			mapManager.render(l);
 			objectManager.render(l);

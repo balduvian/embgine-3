@@ -5,6 +5,11 @@ import org.joml.Vector3f;
 
 public class Transform {
 	
+	protected Vector3f position;
+	protected Vector2f size;
+	protected Vector2f scale;
+	protected float rotation;
+	
 	public Transform clone() {
 		return new Transform(position.x, position.y, size.x, size.y, rotation);
 	}
@@ -12,42 +17,42 @@ public class Transform {
 	public Transform(float x, float y, float w, float h, float r) {
 		position = new Vector3f(x, y, 0);
 		size = new Vector2f(w, h);
+		scale = new Vector2f(1, 1);
 		rotation = r;
 	}
 	
 	public Transform(float x, float y, float w, float h) {
 		position = new Vector3f(x, y, 0);
 		size = new Vector2f(w, h);
+		scale = new Vector2f(1, 1);
 		rotation = 0;
-	}
-	
-	public Transform(Transform t) {
-		position = new Vector3f(t.position);
-		size = new Vector2f(t.size);
-		rotation = t.rotation;
 	}
 	
 	public Transform(float w, float h) {
 		position = new Vector3f();
 		size = new Vector2f(w, h);
+		scale = new Vector2f(1, 1);
 		rotation = 0;
 	}
 	
 	public Transform() {
 		position = new Vector3f();
 		size = new Vector2f(1, 1);
+		scale = new Vector2f(1, 1);
 		rotation = 0;
 	}
 	
-	protected Vector3f position;
-	
-	protected Vector2f size;
-	
-	protected float rotation;
+	public Transform(Transform t) {
+		position = new Vector3f(t.position);
+		size = new Vector2f(t.size);
+		scale = new Vector2f(t.scale);
+		rotation = t.rotation;
+	}
 	
 	public void set(Transform t) {
 		position = new Vector3f(t.position);
 		size = new Vector2f(t.size);
+		scale = new Vector2f(t.scale);
 		rotation = t.rotation;
 	}
 	
@@ -78,6 +83,27 @@ public class Transform {
 		size.set(s);
 	}
 	
+	public void setScale(float x, float y) {
+		scale.x = x;
+		scale.y = y;
+	}
+	
+	public void setXScale(float x) {
+		scale.x = x;
+	}
+	
+	public float getXScale() {
+		return scale.x;
+	}
+	
+	public void setYScale(float y) {
+		scale.y = y;
+	}
+	
+	public float getYScale() {
+		return scale.y;
+	}
+	
 	public void setRotation(float r) {
 		rotation = r;
 	}
@@ -95,11 +121,11 @@ public class Transform {
 	}
 	
 	public float getHeight() {
-		return size.y;
+		return size.y * scale.y;
 	}
 	
 	public float getWidth() {
-		return size.x;
+		return size.x * scale.x;
 	}
 	
 	public void setX(float x) {
@@ -120,10 +146,6 @@ public class Transform {
 	
 	public Vector3f getPosition() {
 		return position;
-	}
-	
-	public Vector2f getSize() {
-		return size;
 	}
 	
 	public float getRotation() {

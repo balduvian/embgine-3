@@ -54,18 +54,22 @@ public class Map extends Element{
 	}
 	
 	public void subRender(int layer) {
-		mapRect.getTransform().setSize(1, 1);
+		
+		float mapX = transform.getX();
+		float mapY = transform.getY();
+		
+		mapRect.getTransform().setSize(Index.TILE * (transform.getWidth() / mapWidth), Index.TILE * (transform.getHeight() / mapHeight));
 		
 		Transform cameraTransform = camera.getTransform();
 		int x = Math.round(cameraTransform.getX());
 		int y = Math.round(cameraTransform.getY());
-		int gwHalf = (int) Math.ceil( index.getGameWidth() / 2);
-		int ghHalf = (int) Math.ceil(index.getGameHeight() / 2);
+		float gwHalf =  index.getGameWidth() / 2;
+		float ghHalf = index.getGameHeight() / 2 ;
 		
-		int  left = x - gwHalf;
-		int right = x + gwHalf;
-		int    up = y - ghHalf;
-		int  down = y + ghHalf;
+		int  left = Math.round( (x - gwHalf - mapX) / Index.TILE );
+		int right = (int) Math.ceil( (x + gwHalf - mapX) / Index.TILE );
+		int    up = Math.round( (y - ghHalf - mapY) / Index.TILE );
+		int  down = (int) Math.ceil( (y + ghHalf - mapY) / Index.TILE );
 		
 		for(int i = left; i <= right; ++i) {
 			for(int j = up; j <= down; ++j) {
@@ -75,8 +79,8 @@ public class Map extends Element{
 					Texture t = b.getTexture();
 					Vector4f frame = t.getFrame(b.getValue());
 					
-					mapRect.getTransform().setPosition(i, j);
-					
+					mapRect.getTransform().setPosition(mapX + (i * Index.TILE), mapY + (j * Index.TILE));
+
 					t.bind();
 					
 					shader.enable(new float[] {frame.x, frame.y, frame.z, frame.w, 1f, 1f, 1f, 1f});
@@ -90,6 +94,19 @@ public class Map extends Element{
 		}
 	}
 	
+	public boolean onScreenUpdate(Camera camera) {
+		onScreen  = true;
+		return true;
+	}
+	
+	public int accessX(float lx) {
+		return (int) Math.round((lx - transform.getX()) / (Index.TILE));
+	}
+	
+	public int accessY(float ly) {
+		return (int) Math.round((ly - transform.getY()) / (Index.TILE));
+	}
+	
 	public Block access(int x, int y) {
 		if(edgeMode) {
 			return repeatAccess(x, y);
@@ -98,6 +115,14 @@ public class Map extends Element{
 		}
 	}
 	
+	public float positionX(int mx) {
+		return Index.TILE * (mx + transform.getX());
+	}
+
+	public float positionY(int my) {
+		return Index.TILE * (my + transform.getY());
+	}
+
 	private Block edgeAccess(int x, int y) {
 		try {
 			return map[x][y];

@@ -10,6 +10,7 @@ public class GameData_Game extends GameData{
 	public GameData_Game() {
 		super(
 			MarioMaster.class,
+			16,
 			26.66666667f, 
 			15, 
 			"Mario Demo", 

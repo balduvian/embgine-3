@@ -9,15 +9,12 @@ abstract public class Renderer<I extends Info> extends Component{
 	private float[] packet;
 	protected I info;
 	protected Shape shape;
-	protected Transform transform;
-	protected boolean tSync;
 	
-	public Renderer(I i, Shape s, boolean t) {
+	public Renderer(I i, Shape s, boolean ts) {
+		super(new Transform(), ts);
 		info = i;
 		shape = s;
-		tSync = t;
 		packet = new float[info.getNumParams()];
-		transform = new Transform();
 	}
 	
 	public void setTransform(Transform t) {
@@ -45,7 +42,10 @@ abstract public class Renderer<I extends Info> extends Component{
 		info.setPacket(packet);
 		info.setShape(shape);
 		if(tSync) {
-			info.setTransform(parent.getTransform());
+			Transform pt = parent.getTransform();
+			float x = Math.round(pt.getX());
+			float y = Math.round(pt.getY());
+			info.setTransform(new Transform(x, y, pt.getWidth(), pt.getHeight()));
 		}else {
 			info.setTransform(transform);
 		}

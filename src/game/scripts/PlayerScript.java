@@ -5,10 +5,12 @@ import embgine.core.Block;
 import embgine.core.Index;
 import embgine.core.Scene;
 import embgine.core.components.HitBox;
+import embgine.core.components.TilRenderer;
 import embgine.core.elements.GameObject;
 import embgine.core.elements.Map;
 import embgine.core.scripts.ObjectScript;
 import embgine.core.scripts.Script;
+import embgine.graphics.Transform;
 import embgine.graphics.Window;
 
 public class PlayerScript extends ObjectScript{
@@ -21,6 +23,7 @@ public class PlayerScript extends ObjectScript{
 	private Window input;
 	private Map map;
 	
+	private double animTimer;
 	private int animFrame;
 	
 	private float jumpSpeed;
@@ -37,11 +40,15 @@ public class PlayerScript extends ObjectScript{
 	private boolean aPress;
 	private boolean dPress;
 	
+	private static int width;
+	
 	//the amount the player is actually moving this frame
 	private float frameX;
 	private float frameY;
 	
 	public void start(Object... params) {
+		
+		width = 16;
 		
 		Index ind = scene.getIndex();
 		
@@ -49,13 +56,13 @@ public class PlayerScript extends ObjectScript{
 
 		animFrame = 0;
 		
-		xMax = 7f;
-		yMax = 20;
+		xMax = 7 * Index.TILE;
+		yMax = 20 * Index.TILE;
 		
-		jumpSpeed = 15;
-		speed = 0.5f;
+		jumpSpeed = 15 * Index.TILE;
+		speed = 0.5f * Index.TILE;
 		
-		grav = 0.5f;
+		grav = 0.5f * Index.TILE;
 		air = true;
 		
 	}
@@ -63,11 +70,10 @@ public class PlayerScript extends ObjectScript{
 	@Override
 	public void update() {
 		
-		try {
-			map = (Map)scene.getCurrentMaps()[0];
-		}catch(Exception ex) {
-			
-		}
+		Transform t = parent.getTransform();
+		float x = t.getXScale() * 1.001f;
+		float y = t.getXScale() * 1.001f;
+		t.setScale(x, y);
 		
 		getInput();
 		gravity();
@@ -159,34 +165,41 @@ public class PlayerScript extends ObjectScript{
 		float nowX = parent.getTransform().getX();
 		float nowY = parent.getTransform().getY();
 		
-		int upY = Math.round(nowY + collBox.up);
-		int midY = Math.round(nowY);
-		int downY = superRound(nowY + collBox.down);
+		int upMapY = map.accessY(collBox.getUp());
+		int midMapY = map.accessY(nowY);
+		int downMapY = map.accessY(collBox.getDown());
 		
-		//System.out.println( "klack: " + (nowY) + " anti: " + (nowY + collBox.down) + " kneeck: " + (downY) );
 		
-		int leftX = Math.round(nowX + collBox.left);
-		int midX = Math.round(nowX);
-		int rightX = superRound(nowX + collBox.right);
-	
+		int leftMapX = map.accessX(collBox.getLeft());
+		int midMapX = map.accessX(nowX);
+		int rightMapX = map.accessX(collBox.getRight());
+		
+		System.out.println(upMapY + " " + downMapY);
+		
 		float limit;
-		
+	
 		//down collision
-		limit = midY + 0.5f - collBox.down;
-		for(int i = leftX; i <= rightX; ++i) {
-			Block b = map.access(i, midY + 1);
-			if(b != null && b.isSolid()) {
-				if(nowY + frameY > limit) {
-					air = false;
-					yVel = 0;
-					frameY = (limit - nowY);
-					break;
+		if(frameY >= 0) {
+			for(int j = upMapY; j <= downMapY; ++j) {
+				limit = ( (Math.round( (nowY / Index.TILE) + 0.5f) * Index.TILE ) - collBox.getJustDown() );
+				for(int i = leftMapX; i <= rightMapX; ++i) {
+					Block b = map.access(i, j);
+					if(b != null && b.isSolid()) {
+						if(nowY + frameY > limit) {
+							air = false;
+							yVel = 0;
+							frameY = (limit - nowY);
+							break;
+						}
+					}
 				}
+				
 			}
 		}
 		
+		/*
 		//right collision
-		limit = midX + 0.5f - collBox.right;
+		limit = ( (midX + 0.5f) * Index.TILE ) - collBox.right;
 		for(int i = upY; i <= downY; ++i) {
 			Block b = map.access(midX + 1, i);
 			if(b != null && b.isSolid()) {
@@ -199,7 +212,7 @@ public class PlayerScript extends ObjectScript{
 		}
 		
 		//up collision
-		limit = midY - 0.5f - collBox.up;
+		limit = ( (midY - 0.5f) * Index.TILE ) - collBox.up;
 		for(int i = leftX; i <= rightX; ++i) {
 			Block b = map.access(i, midY - 1);
 			if(b != null && b.isSolid()) {
@@ -212,7 +225,7 @@ public class PlayerScript extends ObjectScript{
 		}
 		
 		//left collision
-		limit = midX - 0.5f - collBox.left;
+		limit = ( (midX - 0.5f) * Index.TILE ) - collBox.left;
 		for(int i = upY; i <= downY; ++i) {
 			Block b = map.access(midX - 1, i);
 			if(b != null && b.isSolid()) {
@@ -223,7 +236,7 @@ public class PlayerScript extends ObjectScript{
 				}
 			}
 		}
-		
+		*/
 	}
 	
 	//actually moves the player
@@ -233,6 +246,24 @@ public class PlayerScript extends ObjectScript{
 	
 	private void animUpdate() {
 		
+		animTimer += Base.time;
+		
+		if(xVel > 0) {
+			parent.getTransform().setWidth(width);
+			animFrame = (int)(animTimer * 7 % 3);
+			animTimer %= 3;
+		}else if(xVel < 0){
+			parent.getTransform().setWidth(-width);
+			animFrame = (int)(animTimer * 7 % 3);
+			animTimer %= 3;
+		}else {
+			animFrame = 0;
+		}
+		
+		((TilRenderer)parent.getComponent(0)).setFrame(animFrame);
 	}
 
+	public void setMap(Map m) {
+		map = m;
+	}
 }

@@ -1,3 +1,5 @@
+//gatcuddy <emmettglaser@gmail.com>
+
 package embgine.core;
 
 import embgine.core.elements.GameObject;
@@ -28,6 +30,7 @@ public class Base{
 	private int frameRate;
 	
 	private Master master;
+	private int tileSize;
 	private float gameWidth;
 	private float gameHeight;
 	private String name;
@@ -51,8 +54,9 @@ public class Base{
 				System.exit(-1);
 			}
 			
-			gameWidth = gd.width;
-			gameHeight = gd.height;
+			tileSize = gd.tileSize;
+			gameWidth = gd.width * tileSize;
+			gameHeight = gd.height * tileSize;
 			name = gd.gameName;
 			firstScene = Utils.getHashName(gd.sceneList[0]);
 			debugMode = gd.debugMode;
@@ -73,7 +77,7 @@ public class Base{
 			Shader.init();
 			Info.init();
 			
-			index = new Index(gameWidth, gameHeight, name, debugMode, camera, window, audio, gd.sceneList);
+			index = new Index(tileSize, gameWidth, gameHeight, name, debugMode, camera, window, audio, gd.sceneList);
 			
 			splash = new Splash(camera);
 			intro = true;

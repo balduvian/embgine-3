@@ -14,6 +14,8 @@ import embgine.graphics.shapes.Shape;
 
 public class Index {
 
+	public static int TILE;
+	
 	private Window window;
 	private Camera camera;
 	private ALManagement audio;
@@ -31,7 +33,8 @@ public class Index {
 	private String gameName;
 	private boolean debug;
 	
-	public Index(float gw, float gh, String n, boolean db, Camera c, Window w, ALManagement a, Class<? extends Scene>[] sc) {
+	public Index(int ts, float gw, float gh, String n, boolean db, Camera c, Window w, ALManagement a, Class<? extends Scene>[] sc) {
+		TILE = ts;
 		gameWidth = gw;
 		gameHeight = gh;
 		gameName = n;

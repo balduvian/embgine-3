@@ -25,6 +25,10 @@ public class TilRenderer extends Renderer<TilInfo>{
 		return new TilRenderer(shape, tSync, texture);
 	}
 	
+	public void setFrame(int f) {
+		frame = f;
+	}
+	
 	public void setColor(float red, float green, float blue, float alpha) {
 		r = red;
 		g = green;

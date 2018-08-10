@@ -41,7 +41,7 @@ abstract public class Shape {
 		float rotation = transform.getRotation();
 		float width = transform.getWidth();
 		float height = transform.getHeight();
-		
+		//return camera.getProjview().mul( new Matrix4f().translate(position.add(width/2,height/2,0,new Vector3f())).rotateZ(rotation).scale(width,height,1).translate(-1f,-1f,0) );
 		return camera.getProjview().mul( new Matrix4f().translate(position).rotateZ(rotation).scale(width,height,1) , new Matrix4f());
 		
 	}
