@@ -6,12 +6,12 @@ public class HitBox extends Component{
 	
 	private boolean drawn;
 	
-	private float  left;
-	private float right;
-	private float    up;
-	private float  down;
+	private int  left;
+	private int right;
+	private int    up;
+	private int  down;
 	
-	private HitBox(float l, float r, float u, float d, boolean s) {
+	private HitBox(int l, int r, int u, int d, boolean s) {
 		super(new Transform(), s);
 		 left = l;
 		right = r;
@@ -21,52 +21,56 @@ public class HitBox extends Component{
 	}
 	
 	//creates a hitbox based on the absolute positions of the bounds
-	public static HitBox createB(float l, float r, float u, float d, boolean s) {
+	public static HitBox createB(int l, int r, int u, int d, boolean s) {
 		return new HitBox(l, r, u, d, s);
 	}
 
 	//creates a hitbox by finding the bounds of a square with a certain center position and dimensions
-	public static HitBox createT(float x, float y, float w, float h, boolean s) {
-		float halfW = w / 2;
-		float halfH = h / 2;
+	public static HitBox createT(int x, int y, int w, int h, boolean s) {
+
 		return new HitBox(
-			x - halfW,
-			x + halfW,
-			y - halfH,
-			y + halfH,
+			x    ,
+			x + w,
+			y    ,
+			y + h,
 			s
 		);
 	}
 	
-	public float getLeft() {
-		return left * transform.getXScale() + transform.getX();
+	public int getLeft() {
+		return Math.round(left * transform.getXScale() + transform.getX());
 	}
 	
-	public float getRight() {
-		return right * transform.getXScale() + transform.getX();
+	public int getRight() {
+		return Math.round(right * transform.getXScale() + transform.getX());
 	}
 	
-	public float getUp() {
-		return up * transform.getYScale() + transform.getY();
+	public int getUp() {
+		return Math.round(up * transform.getYScale() + transform.getY());
 	}
 	
-	public float getDown() {
-		return down * transform.getYScale() + transform.getY();
+	public int getDown() {
+		return Math.round(down * transform.getYScale() + transform.getY());
 	}
 	
-	public float getJustDown() {
-		return down * transform.getYScale();
+	public int getJustLeft() {
+		return Math.round(left * transform.getYScale());
+	}
+	
+	public int getJustRight() {
+		return Math.round(right * transform.getYScale());
+	}
+	
+	public int getJustUp() {
+		return Math.round(up * transform.getYScale());
+	}
+	
+	public int getJustDown() {
+		return Math.round(down * transform.getYScale());
 	}
 	
 	public void setDrawn(boolean d) {
 		drawn = d;
-	}
-	
-	public void scale(float xf, float yf) {
-		left *= xf;
-		right *= xf;
-		up *= yf;
-		down *= yf;
 	}
 	
 	@Override

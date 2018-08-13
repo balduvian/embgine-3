@@ -20,21 +20,30 @@ public class MapLoader {
 	private int mapWidth, mapHeight;
 	private Class<? extends MapScript> script;
 	private BlockLoader[][] tiles;
-	private int[][] tileValues;
-	private BlockLoader edgeTile;
+	private int[][][] tileValues;
 	private boolean edgeMode;
+	private BlockLoader edgeTile;
 	
 	private String mapPath;
 	private String referenceName;
 	private String edgeTileName;
 
+	private boolean repeatUp;
+	private boolean repeatRight;
+	private boolean repeatDown;
+	private boolean repeatLeft;
+	
 	private int type;
 	
-	public MapLoader(String mp, String rn, String en, boolean em, Class<? extends MapScript> sc) {
+	public MapLoader(String mp, String rn, String en, boolean em, boolean ru, boolean rr, boolean rd, boolean rl, Class<? extends MapScript> sc) {
 		mapPath = mp;
 		referenceName = rn;
 		edgeTileName = en;
 		edgeMode = em;
+		repeatUp = ru;
+		repeatRight = rr;
+		repeatDown = rd;
+		repeatLeft = rl;
 		script = sc;
 	}
 	
@@ -62,7 +71,7 @@ public class MapLoader {
 		
 		Transform transform = new Transform(x, y, mapWidth, mapHeight);
 		
-		return new Map(transform, sInstance, enabled, type, workingCopy, edgeMode, edgeTile);
+		return new Map(transform, sInstance, enabled, type, workingCopy, edgeMode, repeatUp, repeatRight, repeatDown, repeatLeft, edgeTile);
 	}
 	
 	public void init(Index index, int t) {
@@ -82,18 +91,20 @@ public class MapLoader {
 		mapHeight = bi.getHeight();
 		
 		tiles = new BlockLoader[mapWidth][mapHeight];
-		tileValues = new int[mapWidth][mapHeight];
+		tileValues = new int[mapWidth][mapHeight][2];
 		
 		MapReference ref = index.getMapReference(referenceName);
 		
 		int[] keys = ref.getBlockKeys();
 		BlockLoader[] blocks = ref.getBlockRefs();
+		int[][] values = ref.getBlockValues();
+		
 		int len = keys.length;
 		Thread[] threadList = new Thread[len];
 		
 		//CREATE OUR THREADS
 		for(int i = 0; i < len; ++i) {
-			(threadList[i] = new Thread(new PlacerThread(keys[i], blocks[i], bi))).start();
+			(threadList[i] = new Thread(new PlacerThread(keys[i], blocks[i], values[i], bi))).start();
 		}
 		
 		//WAITS FOR THE THREADS TO DIE
@@ -128,10 +139,12 @@ public class MapLoader {
 		int key;
 		BlockLoader block;
 		BufferedImage image;
+		int[] value;
 		
-		public PlacerThread(int k, BlockLoader b, BufferedImage i) {
+		public PlacerThread(int k, BlockLoader b, int[] v, BufferedImage i) {
 			key = k;
 			block = b;
+			value = v;
 			image = i;
 		}
 		
@@ -140,6 +153,7 @@ public class MapLoader {
 				for(int j = 0; j < mapHeight; ++j) {
 					if(image.getRGB(i, j) == key) {
 						tiles[i][j] = block;
+						tileValues[i][j] = value;
 					}
 				}
 			}
@@ -156,11 +170,15 @@ public class MapLoader {
 		}
 		
 		public void run() {
+			
 			if(block.getTileable()) {
 				for(int i = 0; i < mapWidth; ++i) {
 					for(int j = 0; j < mapHeight; ++j) {
 						if(tiles[i][j] == block) {
 							tileValues[i][j] = block.getTile(isTile(i - 1, j, block), isTile(i - 1, j - 1, block), isTile(i, j - 1, block), isTile(i + 1, j - 1, block), isTile(i + 1, j, block), isTile(i + 1, j + 1, block), isTile(i, j + 1, block), isTile(i - 1, j + 1, block));
+							if(block.getClass().getSimpleName().equals("Block_Door")) {
+								System.out.println(tileValues[i][j][0] + " " + tileValues[i][j][1]);
+							}
 						}
 					}
 				}
@@ -168,7 +186,33 @@ public class MapLoader {
 		}
 		
 		private int isTile(int x, int y, BlockLoader b) {
-			return (tiles[x][y] == b) ? 1 : 0;
+			int widthMinus = mapWidth - 1;
+			int heightMinus = mapHeight - 1;
+			if(x < 0) {
+				if(y < 0) {
+					return (repeatLeft && repeatUp && tiles[0][0] == b) ? 1 : 0;
+				} else if(y > heightMinus) {
+					return (repeatLeft && repeatDown && tiles[0][heightMinus] == b) ? 1 : 0;
+				} else {
+					return (repeatLeft && tiles[0][y] == b) ? 1 : 0;
+				}
+			}else if(x > widthMinus) {
+				if(y < 0) {
+					return (repeatRight && repeatUp && tiles[widthMinus][0] == b) ? 1 : 0;
+				} else if(y > heightMinus) {
+					return (repeatRight && repeatDown && tiles[widthMinus][heightMinus] == b) ? 1 : 0;
+				} else {
+					return (repeatRight && tiles[widthMinus][y] == b) ? 1 : 0;
+				}
+			}else {
+				if(y < 0) {
+					return (repeatUp && tiles[x][0] == b) ? 1 : 0;
+				} else if(y > heightMinus) {
+					return (repeatDown && tiles[x][heightMinus] == b) ? 1 : 0;
+				} else {
+					return (tiles[x][y] == b) ? 1 : 0;
+				}
+			}
 		}
 		
 	}

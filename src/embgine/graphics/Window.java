@@ -36,6 +36,7 @@ import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
+import org.lwjgl.opengl.GL30;
 
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
@@ -106,6 +107,7 @@ public class Window {
 		
 		glClearColor(0.1f,0.25f,0.85f,1f);
 		
+		glEnable(GL30.GL_CLIP_DISTANCE0);
 		glEnable(GL_TEXTURE_2D);
 		//glEnable(GL_DEPTH_TEST);
 		//glDepthFunc(GL_LEQUAL);

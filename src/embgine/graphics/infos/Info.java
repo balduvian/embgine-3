@@ -12,6 +12,8 @@ abstract public class Info {
 	public static FonInfo FONINFO;
 	public static TexInfo TEXINFO;
 	public static TilInfo TILINFO;
+	public static SelInfo SELINFO;
+	public static CliInfo CLIINFO;
 	
 	protected float[] packet;
 	
@@ -28,6 +30,8 @@ abstract public class Info {
 		FONINFO = new FonInfo();
 		TEXINFO = new TexInfo();
 		TILINFO = new TilInfo();
+		SELINFO = new SelInfo();
+		CLIINFO = new CliInfo();
 	}
 	
 	public void setPacket(float... p) {

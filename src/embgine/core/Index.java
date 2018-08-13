@@ -3,6 +3,7 @@ package embgine.core;
 import java.util.HashMap;
 
 import embgine.core.elements.Map;
+import embgine.core.loaders.BackgroundLoader;
 import embgine.core.loaders.BlockLoader;
 import embgine.core.loaders.MapLoader;
 import embgine.core.loaders.ObjectLoader;
@@ -24,6 +25,7 @@ public class Index {
 	private HashMap<String, Sound       >         soundMap;
 	private HashMap<String, Font        >          fontMap;
 	private HashMap<String, ObjectLoader>  objectLoaderMap;
+	private HashMap<String, BackgroundLoader> backgroundLoaderMap;
 	private HashMap<String, BlockLoader >         blockMap;
 	private HashMap<String, MapReference>  mapReferenceMap;
 	private HashMap<String, MapLoader   >     mapLoaderMap;
@@ -53,6 +55,7 @@ public class Index {
 		loadSounds(sc.getSounds());
 		loadFonts(sc.getFonts());
 		loadGameObjects(sc.getObjects());
+		loadBackgrounds(sc.getBackgrounds());
 		loadBlocks(sc.getBlocks());
 		loadMapReferences(sc.getMapReferences());
 		loadMaps(sc.getMaps());
@@ -114,6 +117,8 @@ public class Index {
 				build.append(name.charAt(j));
 			}
 			
+			System.out.println(build.toString());
+			
 			soundMap.put(build.toString(), sound);
 		}
 	}
@@ -153,7 +158,32 @@ public class Index {
 				ex.printStackTrace();
 			}
 			
+			loader.giveType(i);
+			
 			objectLoaderMap.put(Utils.getHashName(oc), loader);
+		}
+	}
+	
+	private void loadBackgrounds(Class<? extends BackgroundLoader>[] backgrounds) {
+
+		int len = backgrounds.length;
+		backgroundLoaderMap = new HashMap<String, BackgroundLoader>(len, 1.0f);
+		
+		for(int i = 0; i < len; ++i) {
+			
+			Class<? extends BackgroundLoader> oc = backgrounds[i];
+					
+			BackgroundLoader loader = null;
+			try {
+				loader = (BackgroundLoader)oc.newInstance();
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				System.exit(-1);
+			}
+			
+			loader.giveType(i);
+			
+			backgroundLoaderMap.put(Utils.getHashName(oc), loader);
 		}
 	}
 	
@@ -161,13 +191,17 @@ public class Index {
 		int len = blocks.length;
 		blockMap = new HashMap<String, BlockLoader>(len, 1.0f);
 		
-		for(Class<? extends BlockLoader> cl : blocks) {
+		for(int i = 0; i < len; ++i) {
+			
+			Class<? extends BlockLoader> bc = blocks[i];
 			
 			try {
-				BlockLoader b = (BlockLoader)cl.getConstructors()[0].newInstance();
-				blockMap.put(Utils.getHashName(cl), b);
+				BlockLoader b = (BlockLoader)bc.newInstance();
+				b.setType(i);
+				blockMap.put(Utils.getHashName(bc), b);
 			} catch(Exception ex) {
 				ex.printStackTrace();
+				System.exit(-1);
 			}
 		}
 	}
@@ -256,6 +290,10 @@ public class Index {
 	
 	public ObjectLoader getObjectLoader(String str) {
 		return objectLoaderMap.get(str);
+	}
+	
+	public BackgroundLoader getBackgroundLoader(String str) {
+		return backgroundLoaderMap.get(str);
 	}
 	
 	public Block getBlock(String str) {

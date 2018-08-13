@@ -1,22 +1,24 @@
 package game.gameData;
 
 import embgine.core.GameData;
-import game.master.MarioMaster;
+import game.master.CrushyMaster;
 import game.scenes.Scene_Game;
+import game.scenes.Scene_Title;
 
 public class GameData_Game extends GameData{
 
 	@SuppressWarnings("unchecked")
 	public GameData_Game() {
 		super(
-			MarioMaster.class,
+			CrushyMaster.class,
 			16,
-			26.66666667f, 
-			15, 
-			"Mario Demo", 
-			true, 
+			16, 
+			9, 
+			"Crushy", 
+			false, 
 			false,
 			new Class[] {
+				Scene_Title.class,
 				Scene_Game.class
 			}
 		);

@@ -26,6 +26,10 @@ abstract public class ObjectLoader {
 		layer      = l;
 	}
 	
+	public void giveType(int t) {
+		type = t;
+	}
+	
 	public GameObject create(Scene scene, float x, float y, boolean enabled) {
 		
 		int num = components.length;

@@ -117,4 +117,8 @@ public class Manager{
 		full = false;
 	}
 	
+	public void getLast() {
+		System.out.println("last: " + last);
+	}
+	
 }

@@ -13,10 +13,10 @@ abstract public class Shader {
 	public static Til2DShader TIL2DSHADER;
 	public static Col2DShader COL2DSHADER;
 	public static Cir2DShader CIR2DSHADER;
-	public static Noi2DShader NOI2DSHADER;
-	public static Rai2DShader RAI2DSHADER;
-	public static Fon2DShader FON2DSHADER;
 	public static Tex2DShader TEX2DSHADER;
+	public static Vhs2DShader VHS2DSHADER;
+	public static Sel2DShader SEL2DSHADER;
+	public static Cli2DShader CLI2DSHADER;
 	
 	protected int program;
 	
@@ -28,10 +28,10 @@ abstract public class Shader {
 		COL2DSHADER = new Col2DShader();
 		TIL2DSHADER = new Til2DShader();
 		CIR2DSHADER = new Cir2DShader();
-		NOI2DSHADER = new Noi2DShader();
-		RAI2DSHADER = new Rai2DShader();
-		FON2DSHADER = new Fon2DShader();
 		TEX2DSHADER = new Tex2DShader();
+		VHS2DSHADER = new Vhs2DShader();
+		SEL2DSHADER = new Sel2DShader();
+		CLI2DSHADER = new Cli2DShader();
 	}
 	
 	protected Shader(String vertPath, String fragPath, int numP) {
@@ -84,7 +84,7 @@ abstract public class Shader {
 	}
 	
 	//render with passing information
-	public void enable(float[] p) {
+	public void enable(float... p) {
 		glUseProgram(program);
 		subRoutine(p);
 	}

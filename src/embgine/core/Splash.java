@@ -3,6 +3,7 @@ package embgine.core;
 import embgine.graphics.Camera;
 import embgine.graphics.Texture;
 import embgine.graphics.Transform;
+import embgine.graphics.Window;
 import embgine.graphics.infos.ColInfo;
 import embgine.graphics.infos.FonInfo;
 import embgine.graphics.infos.Info;
@@ -11,7 +12,7 @@ import embgine.graphics.shapes.Shape;
 
 public class Splash {
 	
-	private static final double SHOW_TIME = 0.5;
+	private static final double SHOW_TIME = 3;
 	
 	private double timer;
 	private Camera camera;
@@ -36,19 +37,23 @@ public class Splash {
 		white = Info.COLINFO;
 		logo = Info.TEXINFO;
 		text = Info.FONINFO;
-		logoTex = new Texture("embgine/standard/logo.png", false);
-		logoFont = new Font(new Texture("embgine/standard/text.png", 16, 8), 8, 5);
+		logoTex = new Texture("embgine/standard/logo.png");
+		logoFont = new Font(new Texture("embgine/standard/text.png", 16, 8), 8, 6);
 		text.setText(new char[][] {{'M','a','d','e',' ','W','i','t','h',' ','E','m','b','g','i','n','e'}});
-		text.setParams(logoFont, 1f, true, true, true);
+		text.setParams(logoFont, 9, true, true, true);
 		text.setColor(0, 0, 0, 1);
 		
 		timer = SHOW_TIME;
 	}
 	
-	public boolean update() {
+	public boolean update(Window w) {
 		camera.update();
 		timer -= Base.time;
-		return (timer <= 0);
+		if(w.keyPressed(81)) {
+			return(true);
+		}else {
+			return (timer <= 0);
+		}
 	}
 	
 	public void render() {
@@ -59,13 +64,13 @@ public class Splash {
 		white.setTransform(gt);
 		white.render();
 		
-		gt.set(0, -1, 5, 5);
+		gt.set(96, 40, 64, 64);
 		logo.setTexture(logoTex);
 		logo.setShape(rect);
 		logo.setTransform(gt);
 		logo.render();
 		
-		gt.setPosition(0, 2.5f);
+		gt.setPosition(128, 112);
 		text.setShape(rect);
 		text.setTransform(gt);
 		text.render();

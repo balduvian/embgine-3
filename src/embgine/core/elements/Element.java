@@ -23,6 +23,7 @@ abstract public class Element {
 		script = s;
 		enabled = e;
 		type = y;
+		onScreen = true;
 	}
 	
 	//GETTERS
@@ -69,33 +70,19 @@ abstract public class Element {
 	
 	//ROUTINE
 	public void start() {
-		script.start();
+		if(script != null) {
+			script.start();
+		}
 	}
 	
-	public boolean onScreenUpdate(Camera camera) {
-		if(enabled) {
-			float ex = transform.     getX()    ;
-			float ey = transform.     getY()    ;
-			float ew = transform. getWidth() / 2;
-			float eh = transform.getHeight() / 2;
-			
-			Transform cTransform = camera.getTransform();
-			
-			float cx = cTransform.     getX()    ;
-			float cy = cTransform.     getY()    ;
-			float cw = cTransform. getWidth() / 2;
-			float ch = cTransform.getHeight() / 2;
-			
-			onScreen = (ex + ew > cx - cw) && (ex - ew < cx + cw) && (ey + eh > cy - ch) && (ey - eh < cy + ch);
-			return onScreen;
-		}
-		return false;
-	}
+	abstract public boolean onScreenUpdate(Camera camera);
 	
 	public void update() {
-		if(enabled && script != null) {
-			script.update();
+		if(enabled) {
 			subUpdate();
+			if(script != null) {
+				script.update();
+			}
 		}
 	}
 	

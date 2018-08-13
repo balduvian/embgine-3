@@ -120,28 +120,28 @@ public class Transform {
 		size.y = h;
 	}
 	
-	public float getHeight() {
-		return size.y * scale.y;
+	public int getHeight() {
+		return Math.round(size.y * scale.y);
 	}
 	
-	public float getWidth() {
-		return size.x * scale.x;
+	public int getWidth() {
+		return Math.round(size.x * scale.x);
 	}
 	
 	public void setX(float x) {
 		position.x = x;
 	}
 	
-	public float getX() {
-		return position.x;
+	public int getX() {
+		return Math.round(position.x);
 	}
 	
 	public void setY(float y) {
 		position.y = y;
 	}
 	
-	public float getY() {
-		return position.y;
+	public int getY() {
+		return Math.round(position.y);
 	}
 	
 	public Vector3f getPosition() {

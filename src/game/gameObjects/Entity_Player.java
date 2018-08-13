@@ -19,7 +19,7 @@ public class Entity_Player extends ObjectLoader{
 			false,
 			new Component[] {
 				new TilRenderer(Shape.RECT, true, new Texture("game/textures/player.png", 3)),
-				HitBox.createT(0, 0, Index.TILE/2, Index.TILE, true),
+				HitBox.createB(4, 11, 0, 15, true),
 			},
 			PlayerScript.class,
 			MarioMaster.LAYER_GAME

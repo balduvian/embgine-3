@@ -8,13 +8,15 @@ import embgine.graphics.shapes.Shape;
 public class TilRenderer extends Renderer<TilInfo>{
 
 	private Texture texture;
-	private int frame;
+	private int frameX;
+	private int frameY;
 	private float r, g, b, a;
 	
 	public TilRenderer(Shape s, boolean synced, Texture t) {
 		super(Info.TILINFO, s, synced);
 		texture = t;
-		frame = 0;
+		frameX = 0;
+		frameY = 0;
 		r = 1;
 		g = 1;
 		b = 1;
@@ -25,8 +27,9 @@ public class TilRenderer extends Renderer<TilInfo>{
 		return new TilRenderer(shape, tSync, texture);
 	}
 	
-	public void setFrame(int f) {
-		frame = f;
+	public void setFrame(int x, int y) {
+		frameX = x;
+		frameY = y;
 	}
 	
 	public void setColor(float red, float green, float blue, float alpha) {
@@ -40,7 +43,7 @@ public class TilRenderer extends Renderer<TilInfo>{
 	void preRender() {
 		info.setColor(r, g, b, a);
 		info.setTexture(texture);
-		info.giveFrame(frame);
+		info.giveFrame(frameX, frameY);
 	}
 
 }

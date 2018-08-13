@@ -10,6 +10,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL12;
 
 public class Texture {
 	
@@ -18,26 +19,29 @@ public class Texture {
 	private float frameWidth;
 	private float frameHeight;
 	
-	public Texture(String path, boolean n) {
-		init(path, n);
+	private int width;
+	private int height;
+	
+	public Texture(String path, boolean n, boolean c) {
+		init(path, n, c);
 		frameWidth = 1;
 		frameHeight = 1;
 	}
 	
 	public Texture(String path) {
-		init(path, true);
+		init(path, true, false);
 		frameWidth = 1;
 		frameHeight = 1;
 	}
 	
 	public Texture(String path, int fw, int ft){
-		init(path, true);
+		init(path, true, false);
 		frameWidth = 1f/fw;
 		frameHeight = 1f/ft;
 	}
 	
 	public Texture(String path, int fw){
-		init(path, true);
+		init(path, true, false);
 		frameWidth = 1f/fw;
 		frameHeight = 1f;
 	}
@@ -50,16 +54,27 @@ public class Texture {
 		return new Vector4f(frameWidth, 1, x*frameWidth, 1);
 	}
 	
-	private void init(String path, boolean nearest) {
+	public Texture(int w, int h) {
+        width = w;
+        height = h;
+        id = glGenTextures();
+        bind();
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (ByteBuffer) null);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        unbind();
+    }
+	
+	private void init(String path, boolean nearest, boolean clamp) {
 		try {
 			BufferedImage b = ImageIO.read(this.getClass().getClassLoader().getResource(path).openStream());
-			int h = b.getHeight();
-			int w = b.getWidth();
-			int[] pixels = b.getRGB(0, 0, w, h, null, 0, w);
-			ByteBuffer buffer = BufferUtils.createByteBuffer(w*h*4);
-			for(int i = 0; i < h; ++i) {
-				for(int j = 0; j < w; ++j) {
-					int pixel = pixels[i*w+j];
+			width = b.getWidth();
+			height = b.getHeight();
+			int[] pixels = b.getRGB(0, 0, width, height, null, 0, width);
+			ByteBuffer buffer = BufferUtils.createByteBuffer(width*height*4);
+			for(int i = 0; i < height; ++i) {
+				for(int j = 0; j < width; ++j) {
+					int pixel = pixels[i*width+j];
 					buffer.put((byte)((pixel >> 16) & 0xff));
 					buffer.put((byte)((pixel >>  8) & 0xff));
 					buffer.put((byte)((pixel      ) & 0xff));
@@ -69,8 +84,10 @@ public class Texture {
 			buffer.flip();
 			id = glGenTextures();
 			bind();
-			//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-			//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+			if(clamp) {
+				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+			}
 			if(nearest) {
 				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -78,7 +95,7 @@ public class Texture {
 				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			}
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 			unbind();
 			
 		}catch(IOException ex) {
@@ -98,4 +115,15 @@ public class Texture {
 		glDeleteTextures(id);
 	}
 	
+	public int getId() {
+		return id;
+	}
+	
+	public int getWidth() {
+		return width;
+	}
+	
+	public int getHeight() {
+		return height;
+	}
 }

@@ -4,15 +4,17 @@ import embgine.core.loaders.BlockLoader;
 
 public abstract class MapReference {
 	
-	private int len;
 	private int[] blockKeys;
 	private String[] blockNames;
 	private BlockLoader[] blockRefs;
+	private int[][] blockValues;
 	
-	public MapReference(int[] bk, String[] br) {
+	public MapReference(int[] bk, String[] br, int[][] bv) {
 		blockKeys = bk;
 		
 		blockNames = br;
+		
+		blockValues = bv;
 	}
 	
 	public void init(Index index) {
@@ -31,14 +33,8 @@ public abstract class MapReference {
 		return blockRefs;
 	}
 	
-	public BlockLoader getBlock(int color) {
-		for(int i = 0; i < len; ++i) {
-			if(blockKeys[i] == color) {
-				try {
-					return blockRefs[i];
-				}catch(Exception ex) {}
-			}
-		}
-		return null;
+	public int[][] getBlockValues(){
+		return blockValues;
 	}
+	
 }

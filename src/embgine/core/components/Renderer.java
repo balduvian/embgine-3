@@ -6,7 +6,6 @@ import embgine.graphics.shapes.Shape;
 
 abstract public class Renderer<I extends Info> extends Component{
 	
-	private float[] packet;
 	protected I info;
 	protected Shape shape;
 	
@@ -14,20 +13,12 @@ abstract public class Renderer<I extends Info> extends Component{
 		super(new Transform(), ts);
 		info = i;
 		shape = s;
-		packet = new float[info.getNumParams()];
 	}
 	
 	public void setTransform(Transform t) {
 		transform = t;
 	}
-	
-	protected void setParams(float... p) {
-		packet = p;
-	}
-	
-	protected void setParam(float p, int i) {
-		packet[i] = p;
-	}
+
 	
 	public void setTSync(boolean t) {
 		tSync = t;
@@ -39,13 +30,10 @@ abstract public class Renderer<I extends Info> extends Component{
 	
 	public void render() {
 		preRender();
-		info.setPacket(packet);
 		info.setShape(shape);
 		if(tSync) {
-			Transform pt = parent.getTransform();
-			float x = Math.round(pt.getX());
-			float y = Math.round(pt.getY());
-			info.setTransform(new Transform(x, y, pt.getWidth(), pt.getHeight()));
+			Transform t = parent.getTransform();
+			info.setTransform(new Transform(t.getX(), t.getY(), t.getWidth(), t.getHeight(), t.getRotation()));
 		}else {
 			info.setTransform(transform);
 		}

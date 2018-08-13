@@ -41,35 +41,6 @@ public class FonInfo extends Info {
 		centeredT = ct;
 	}
 	
-	public void setText(String s) {
-		char[] initial = s.toCharArray();
-		ArrayList<ArrayList<Character>> temp = new ArrayList<ArrayList<Character>>();
-		int length = initial.length;
-		
-		int line = 0;
-		temp.add(new ArrayList<Character>());
-		for(int i = 0; i < length; ++i) {
-			char c = initial[i];
-			if(c == '\n') {
-				temp.add(new ArrayList<Character>());
-				++line;
-			}else {
-				temp.get(line).add(c);
-			}
-		}
-		++line;
-		
-		characters = new char[line][];
-		for(int i = 0; i < line; ++i) {
-			ArrayList<Character> ac = temp.get(0);
-			int size = ac.size();
-			characters[i] = new char[size];
-			for(int j = 0; j < size; ++j) {
-				characters[i][j] = ac.get(j);
-			}
-		}
-	}
-	
 	public char[][] getText() {
 		return characters;
 	}

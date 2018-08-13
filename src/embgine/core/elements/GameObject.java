@@ -1,5 +1,6 @@
 package embgine.core.elements;
 
+import embgine.core.Index;
 import embgine.core.components.Component;
 import embgine.core.components.HitBox;
 import embgine.core.scripts.ObjectScript;
@@ -44,9 +45,6 @@ public class GameObject extends Element{
 		for(int i = 0; i < numComponents; ++i) {
 			components[i].update();
 		}
-		if(gui) {
-			transform.move(camera.getTransform().getX(), camera.getTransform().getY());
-		}
 	}
 	
 	public void subRender(int l) {
@@ -56,7 +54,7 @@ public class GameObject extends Element{
 			}
 		}
 		if(gui) {
-			transform.move(-camera.getTransform().getX(), -camera.getTransform().getY());
+			transform.setPosition(camera.getTransform().getX() + 24, camera.getTransform().getY() + camera.getTransform().getHeight() - 16);
 		}
 	}
 	
@@ -80,6 +78,27 @@ public class GameObject extends Element{
 
 	public void setLayer(int l) {
 		layer = l;
+	}
+
+	@Override
+	public boolean onScreenUpdate(Camera camera) {
+		if(enabled) {
+			float ex = transform.     getX();
+			float ey = transform.     getY();
+			float ew = transform. getWidth();
+			float eh = transform.getHeight();
+			
+			Transform cTransform = camera.getTransform();
+			
+			float cx = cTransform.     getX();
+			float cy = cTransform.     getY();
+			float cw = cTransform. getWidth();
+			float ch = cTransform.getHeight();
+			
+			onScreen = (ex + ew > cx) && (ex < cx + cw) && (ey + eh > cy) && (ey < cy + ch);
+			return onScreen;
+		}
+		return false;
 	}
 	
 }

@@ -1,8 +1,10 @@
 package embgine.core;
 
+import embgine.core.elements.Background;
 import embgine.core.elements.Element;
 import embgine.core.elements.GameObject;
 import embgine.core.elements.Map;
+import embgine.core.loaders.BackgroundLoader;
 import embgine.core.loaders.BlockLoader;
 import embgine.core.loaders.MapLoader;
 import embgine.core.loaders.ObjectLoader;
@@ -23,29 +25,39 @@ public class Scene {
 	private                        String[]  soundLoads;
 	private Class<? extends         Font>[]   fontLoads;
 	private Class<? extends ObjectLoader>[] objectLoads;
+	private Class<? extends BackgroundLoader>[] backgroundLoads;
 	private Class<? extends  BlockLoader>[]  blockLoads;
 	private Class<? extends MapReference>[] mapReferenceLoads;
 	private Class<? extends    MapLoader>[]    mapLoads;
 	
+	private Class<? extends StateScript<?>> initialClass;
 	private StateScript<SceneScript> initialState;
 	
 	private Manager objectManager;
 	private Manager mapManager;
+	private Manager backgroundManager;
 	
 	private int layers;
 	
 	private String switchValue;
 	
+	private Class<? extends SceneScript> scriptClass;
 	private SceneScript script;
 	
 	private Element[] currentObjects;
 	private Element[] currentMaps;
+	private Element[] currentBackgrounds;
+	
+	private int maxObjects;
+	private int maxMaps;
+	private int maxBackgrounds;
 	
 	@SuppressWarnings("unchecked")
-	public Scene(Class<? extends SceneScript> sceneScript, Class<? extends StateScript<?>> stateScript, int numLayers, int maxObjects, int maxMaps, String[] sounds, Class<? extends Font>[] fonts, Class<? extends ObjectLoader>[] objects, Class<? extends BlockLoader>[] blocks, Class<? extends MapReference>[] refs, Class<? extends MapLoader>[] maps) {
+	public Scene(Class<? extends SceneScript> sceneScript, Class<? extends StateScript<?>> stateScript, int numLayers, int maxO, int maxM, int maxB, String[] sounds, Class<? extends Font>[] fonts, Class<? extends ObjectLoader>[] objects, Class<? extends BackgroundLoader>[] backgrounds, Class<? extends BlockLoader>[] blocks, Class<? extends MapReference>[] refs, Class<? extends MapLoader>[] maps) {
 	
 		try {
-			script = (SceneScript)sceneScript.newInstance();
+			scriptClass = sceneScript;
+			script = (SceneScript)scriptClass.newInstance();
 			script.setScene(this);
 			script.setParent(index);
 		} catch (Exception ex) { 
@@ -54,6 +66,7 @@ public class Scene {
 		}
 		
 		try {
+			initialClass = stateScript;
 			initialState = (StateScript<SceneScript>)stateScript.getConstructors()[0].newInstance();
 			initialState.setScene(this);
 			initialState.setParent(script);
@@ -61,12 +74,18 @@ public class Scene {
 		
 		layers = numLayers;
 		
+		maxObjects = maxO;
+		maxMaps = maxM;
+		maxBackgrounds = maxB;
+		
 		objectManager = new Manager(maxObjects);
 		mapManager = new Manager(maxMaps);
+		backgroundManager = new Manager(maxBackgrounds);
 		
 		soundLoads  = sounds;
 		fontLoads   = fonts;
 		objectLoads = objects;
+		backgroundLoads = backgrounds;
 		blockLoads = blocks;
 		mapReferenceLoads = refs;
 		mapLoads    = maps;
@@ -78,8 +97,57 @@ public class Scene {
 	}
 	
 	public void start() {
+		
+		objectManager = new Manager(maxObjects);
+		mapManager = new Manager(maxMaps);
+		backgroundManager = new Manager(maxBackgrounds);
+		
+		camera.getTransform().setPosition(0, 0);
+		
 		script.start();
-		initialState.start();
+		
+		try {
+			initialState = (StateScript<SceneScript>)initialClass.getConstructors()[0].newInstance();
+			initialState.setScene(this);
+			initialState.setParent(script);
+		} catch (Exception ex) { }
+		
+		if(initialState != null) {
+			initialState.start();
+		}
+	}
+	
+	/**
+	 * Starts the scene from a specified statescript
+	 * @param s - class of the state script
+	 */
+	public void start(Class<? extends StateScript<? extends SceneScript>> s) {
+		
+		objectManager = new Manager(maxObjects);
+		mapManager = new Manager(maxMaps);
+		backgroundManager = new Manager(maxBackgrounds);
+		
+		try {
+			script = (SceneScript)scriptClass.newInstance();
+			script.setScene(this);
+			script.setParent(index);
+		} catch (Exception ex) { 
+			ex.printStackTrace();
+			System.exit(-1);
+		}
+		script.start();
+		
+		try {
+			StateScript<SceneScript> ss = (StateScript<SceneScript>)s.newInstance();
+			ss.setScene(this);
+			ss.setParent(script);
+			if(ss != null) {
+				ss.start();
+			}
+		} catch (Exception ex) { 
+			ex.printStackTrace();
+			System.exit(-1);
+		}
 	}
 	
 	public void resetObjects() {
@@ -90,28 +158,30 @@ public class Scene {
 		mapManager.clear();
 	}
 	
+	public void resetBackgrounds() {
+		backgroundManager.clear();
+	}
+	
 	public void resetAll() {
 		resetObjects();
 		resetMaps();
+		resetBackgrounds();
 	}
 	
 	public String update() {
 		
 		currentObjects = objectManager.onScreenUpdate(camera);
 		currentMaps = mapManager.onScreenUpdate(camera);
+		currentBackgrounds = backgroundManager.onScreenUpdate(camera);
 		
 		switchValue = null;
 		
-		objectManager.update();	
+		script.preUpdate();
+		
 		mapManager.update();
+		objectManager.update();	
 		
 		script.update();
-		
-		
-		Transform ct = camera.getTransform();
-		float x = Math.round(ct.getX());
-		float y = Math.round(ct.getY());
-		camera.getTransform().set(new Transform(x, y, ct.getWidth(), ct.getHeight()));
 		
 		return switchValue;
 	}
@@ -121,6 +191,7 @@ public class Scene {
 		for(int l = 0; l < layers; ++l) {
 			mapManager.render(l);
 			objectManager.render(l);
+			backgroundManager.render(l);
 		}
 	}
 	
@@ -136,10 +207,18 @@ public class Scene {
 		mapManager.remove(o.getIndex());
 	}
 	
+	public void destroyBackground(Background o) {
+		backgroundManager.remove(o.getIndex());
+	}
+	
 	public void switchScene(String s) {
 		switchValue = s;
 	}
 	
+	/**
+     * gets the fbo handle
+     * @return fbo handle
+     */
 	public GameObject createObject(ObjectLoader loader, float x, float y, boolean e, Object... params) {
 		GameObject ret = loader.create(this, x, y, e);
 		objectManager.add(ret);
@@ -150,7 +229,7 @@ public class Scene {
 		return ret;
 	}
 	
-	public Map createMap(MapLoader loader, float x, float y, boolean e, Object... params) {
+	public Map createMap(MapLoader loader, int x, int y, boolean e, Object... params) {
 		Map ret = loader.create(this, x, y, e);
 		mapManager.add(ret);
 		MapScript ms = (MapScript)ret.getScript();
@@ -159,6 +238,21 @@ public class Scene {
 		}
 		return ret;
 	}
+	
+	public Background createBackground(BackgroundLoader loader, int x, int y, boolean e, float p) {
+		Background ret = loader.create(x, y, e, p);
+		backgroundManager.add(ret);
+		return ret;
+	}
+	
+	/*public Element createElement(ElementLoader loader, int x, int y, boolean e, Object... params) {
+		Element ret = loader.create(this, x, y, e);
+		Script<?> s = ret.getScript();
+		if(s != null) {
+			
+		}
+		return ret;
+	}*/
 	
 	public Sound sound(String s, float v, boolean r) {
 		Sound sound = index.getSound(s);
@@ -183,6 +277,15 @@ public class Scene {
 		return currentMaps;
 	}
 	
+	public Element[] getCurrentBackgrounds() {
+		return currentBackgrounds;
+	}
+	
+	public void centerCamera(int x, int y) {
+		Transform cTransform = camera.getTransform();
+		cTransform.setPosition(x - cTransform.getWidth()/2 + Index.TILE/2, y - cTransform.getHeight()/2 + Index.TILE/2);
+	}
+	
 	/*
 	######################################################################################
 	########################### GETTERS ##################################################
@@ -199,6 +302,10 @@ public class Scene {
 	
 	public Class<? extends ObjectLoader>[] getObjects() {
 		return objectLoads;
+	}
+	
+	public Class<? extends BackgroundLoader>[] getBackgrounds(){
+		return backgroundLoads;
 	}
 	
 	public Class<? extends BlockLoader>[] getBlocks() {

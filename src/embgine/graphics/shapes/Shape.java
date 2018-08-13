@@ -41,9 +41,11 @@ abstract public class Shape {
 		float rotation = transform.getRotation();
 		float width = transform.getWidth();
 		float height = transform.getHeight();
-		//return camera.getProjview().mul( new Matrix4f().translate(position.add(width/2,height/2,0,new Vector3f())).rotateZ(rotation).scale(width,height,1).translate(-1f,-1f,0) );
-		return camera.getProjview().mul( new Matrix4f().translate(position).rotateZ(rotation).scale(width,height,1) , new Matrix4f());
-		
+		return camera.getProjview().mul( new Matrix4f().translate(position).rotateZ(rotation).scale(width,height,1));	
+	}
+	
+	public static Matrix4f getNonCameraMatrix(float w, float h) {
+		return new Matrix4f().translate(-1 + (1 - w), -1 + (1 - h), 0).scale(2 * w, 2 * h, 1);
 	}
 	
 	public VAO getVAO() {

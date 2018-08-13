@@ -18,9 +18,7 @@ public class Camera {
 	
 	public void setDims(float w, float h) {
 		transform.setSize(w, h);
-		float halfW = w/2f;
-		float halfH = h/2f;
-		projection = new Matrix4f().setOrtho(-halfW,halfW,halfH,-halfH,1,-1);
+		projection = new Matrix4f().setOrtho(0, w, h, 0, 1, -1);
 	}
 	
 	public void update() {

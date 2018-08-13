@@ -2,6 +2,7 @@ package embgine.core.elements;
 
 import org.joml.Vector4f;
 
+import embgine.core.Base;
 import embgine.core.Block;
 import embgine.core.Index;
 import embgine.core.loaders.BlockLoader;
@@ -26,8 +27,18 @@ public class Map extends Element{
 	private int mapHeight;
 	
 	private boolean edgeMode;
+	private boolean repeatUp;
+	private boolean repeatRight;
+	private boolean repeatDown;
+	private boolean repeatLeft;
 	
-	public Map(Transform transform, MapScript script, boolean enabled, int type, Block[][] m, boolean edge, BlockLoader tile) {
+	private float speed;
+	private float movement;
+	
+	private int lastX;
+	private int move;
+	
+	public Map(Transform transform, MapScript script, boolean enabled, int type, Block[][] m, boolean edge, boolean edgeUp, boolean edgeRight, boolean edgeDown, boolean edgeLeft, BlockLoader tile) {
 		super(transform, script, enabled, type);
 		
 		if(script != null) {
@@ -41,6 +52,13 @@ public class Map extends Element{
 		
 		edgeMode = edge;
 		edgeTile = tile;
+		
+		repeatUp = edgeUp;
+		repeatRight = edgeRight;
+		repeatDown = edgeDown;
+		repeatLeft = edgeLeft;
+		
+		lastX = transform.getX();
 	}
 	
 	public static void setup(Index x) {
@@ -58,18 +76,18 @@ public class Map extends Element{
 		float mapX = transform.getX();
 		float mapY = transform.getY();
 		
-		mapRect.getTransform().setSize(Index.TILE * (transform.getWidth() / mapWidth), Index.TILE * (transform.getHeight() / mapHeight));
+		mapRect.getTransform().setSize(Index.TILE * transform.getXScale(), Index.TILE * transform.getYScale());
 		
 		Transform cameraTransform = camera.getTransform();
-		int x = Math.round(cameraTransform.getX());
-		int y = Math.round(cameraTransform.getY());
-		float gwHalf =  index.getGameWidth() / 2;
-		float ghHalf = index.getGameHeight() / 2 ;
+		int x = cameraTransform.getX();
+		int y = cameraTransform.getY();
+		float gw = index.getGameWidth();
+		float gh = index.getGameHeight();
 		
-		int  left = Math.round( (x - gwHalf - mapX) / Index.TILE );
-		int right = (int) Math.ceil( (x + gwHalf - mapX) / Index.TILE );
-		int    up = Math.round( (y - ghHalf - mapY) / Index.TILE );
-		int  down = (int) Math.ceil( (y + ghHalf - mapY) / Index.TILE );
+		int  left = (int) Math.floor( (x - mapX     ) / Index.TILE );
+		int right = (int) Math.ceil ( (x + gw - mapX) / Index.TILE );
+		int    up = (int) Math.floor( (y - mapY     ) / Index.TILE );
+		int  down = (int) Math.ceil ( (y + gh - mapY) / Index.TILE );
 		
 		for(int i = left; i <= right; ++i) {
 			for(int j = up; j <= down; ++j) {
@@ -77,7 +95,7 @@ public class Map extends Element{
 				if(b != null && b.getLayer() == layer) {
 					
 					Texture t = b.getTexture();
-					Vector4f frame = t.getFrame(b.getValue());
+					Vector4f frame = t.getFrame(b.getValueX(), b.getValueY());
 					
 					mapRect.getTransform().setPosition(mapX + (i * Index.TILE), mapY + (j * Index.TILE));
 
@@ -95,16 +113,39 @@ public class Map extends Element{
 	}
 	
 	public boolean onScreenUpdate(Camera camera) {
-		onScreen  = true;
-		return true;
+		if(enabled) {
+			float ex = transform.     getX();
+			float ey = transform.     getY();
+			float ew = mapWidth * Index.TILE;
+			float eh = mapHeight * Index.TILE;
+			
+			Transform cTransform = camera.getTransform();
+			
+			float cx = cTransform.     getX();
+			float cy = cTransform.     getY();
+			float cw = cTransform. getWidth();
+			float ch = cTransform.getHeight();
+			
+			onScreen = (ex + ew > cx || repeatRight) && (ex < cx + cw || repeatLeft) && (ey + eh > cy || repeatDown) && (ey < cy + ch || repeatUp);
+			return onScreen;
+		}
+		return false;
 	}
 	
 	public int accessX(float lx) {
-		return (int) Math.round((lx - transform.getX()) / (Index.TILE));
+		float ret = ( (lx - transform.getX() ) / (Index.TILE) );
+		if(ret < 0) {
+			--ret;
+		}
+		return (int) ret;
 	}
 	
 	public int accessY(float ly) {
-		return (int) Math.round((ly - transform.getY()) / (Index.TILE));
+		float ret = ( (ly - transform.getY() ) / (Index.TILE) );
+		if(ret < 0) {
+			--ret;
+		}
+		return (int) ret;
 	}
 	
 	public Block access(int x, int y) {
@@ -115,12 +156,12 @@ public class Map extends Element{
 		}
 	}
 	
-	public float positionX(int mx) {
-		return Index.TILE * (mx + transform.getX());
+	public int positionX(int mx) {
+		return Index.TILE * mx + transform.getX();
 	}
 
-	public float positionY(int my) {
-		return Index.TILE * (my + transform.getY());
+	public int positionY(int my) {
+		return Index.TILE * my + transform.getY();
 	}
 
 	private Block edgeAccess(int x, int y) {
@@ -128,6 +169,18 @@ public class Map extends Element{
 			return map[x][y];
 		}catch(Exception ex) {
 			try {
+				if(!repeatUp && y < 0) {
+					throw new Exception();
+				}
+				if(!repeatDown && y >= mapHeight) {
+					throw new Exception();
+				}
+				if(!repeatLeft && x < 0) {
+					throw new Exception();
+				}
+				if(!repeatRight && x >= mapHeight) {
+					throw new Exception();
+				}
 				return (Block)edgeTile.create();
 			} catch(Exception ex2) {
 				return null;
@@ -137,14 +190,30 @@ public class Map extends Element{
 	
 	private Block repeatAccess(int x, int y) {
 		if(x < 0) {
-			x = 0;
+			if(repeatLeft) {
+				x = 0;
+			}else {
+				return null;
+			}
 		}else if(x >= mapWidth){
-			x = mapWidth-1;
+			if(repeatRight) {
+				x = mapWidth-1;
+			}else {
+				return null;
+			}
 		}
 		if(y < 0) {
-			y = 0;
+			if(repeatUp) {
+				y = 0;
+			}else {
+				return null;
+			}
 		}else if(y >= mapHeight){
-			y = mapHeight-1;
+			if(repeatDown) {
+				y = mapHeight-1;
+			}else {
+				return null;
+			}
 		}
 		return map[x][y];
 	}
@@ -162,7 +231,19 @@ public class Map extends Element{
 	}
 
 	public void subUpdate() {
-		script.update();
+		movement = (float) (speed * Base.time);
+		transform.moveX(movement);
+		int nowX = transform.getX();
+		move = nowX-lastX;
+		lastX = nowX;
+	}
+	
+	public void setSpeed(float s) {
+		speed = s;
+	}
+	
+	public int getMove() {
+		return move;
 	}
 	
 }

@@ -24,8 +24,8 @@ public class TilInfo extends Info{
 		setPacket(7, a);
 	}
 	
-	public void giveFrame(int f) {
-		Vector4f frame = texture.getFrame(f);
+	public void giveFrame(int x, int y) {
+		Vector4f frame = texture.getFrame(x, y);
 		setPacket(0, frame.x);
 		setPacket(1, frame.y);
 		setPacket(2, frame.z);
