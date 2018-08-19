@@ -105,7 +105,7 @@ public class GameScript extends SceneScript{
 				scrolling = true;
 			}else if(gibCount == -1 && cy > scrollY + camera.getTransform().getHeight()/2){
 				die();
-				scene.sound("crush.wav", 0.25f, false);
+				scene.playSound("crush.wav", 0.25f, false);
 			}
 		}
 		

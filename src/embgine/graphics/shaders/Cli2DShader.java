@@ -1,40 +1,32 @@
 package embgine.graphics.shaders;
 
-import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL20.*;
 
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
+import org.joml.Matrix4f;
 
 public class Cli2DShader extends Shader {
 	
 	private int texLoc;
 	private int colorLoc;
 	private int planeLoc;
-	private int viewLoc;
+	private int modelLoc;
 	
-	protected void subRoutine(float[] p) {
-		glUniform4f(texLoc, p[0], p[1], p[2], p[3]);
-		glUniform4f(colorLoc, p[4], p[5], p[6], p[7]);
-		glUniform4f(planeLoc, p[8], p[9], p[10], p[11]);
-		float[] array = new float[16];
-		for(int i = 0; i < 16; ++i) {
-			array[i] = p[i + 12];
-		}
-		glUniformMatrix4fv(viewLoc, false, array);
+	protected void sendUniforms(Object... params) {
+		glUniform4f(texLoc, (float)params[0], (float)params[1], (float)params[2], (float)params[3]);
+		glUniform4f(colorLoc, (float)params[4], (float)params[5], (float)params[6], (float)params[7]);
+		glUniform4f(planeLoc, (float)params[8], (float)params[9], (float)params[10], (float)params[11]);
+		glUniformMatrix4fv(modelLoc, false, ((Matrix4f)params[12]).get(new float[16]));
 	}
 	
 	public Cli2DShader() {
-		super("embgine/shaders/cli2d.vs", "embgine/shaders/cli2d.fs", 28);
-		
+		super("embgine/shaders/cli2d.vs", "embgine/shaders/cli2d.fs");
 	}
 	
 	protected void getUniforms() {
 		texLoc = glGetUniformLocation(program, "frame");
 		colorLoc = glGetUniformLocation(program, "inColor");
 		planeLoc = glGetUniformLocation(program, "plane");
-		viewLoc = glGetUniformLocation(program, "view");
+		modelLoc = glGetUniformLocation(program, "model");
 	}
 	
 }

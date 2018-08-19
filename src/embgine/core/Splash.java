@@ -1,13 +1,12 @@
 package embgine.core;
 
+import org.joml.Matrix4f;
+
 import embgine.graphics.Camera;
 import embgine.graphics.Texture;
 import embgine.graphics.Transform;
 import embgine.graphics.Window;
-import embgine.graphics.infos.ColInfo;
-import embgine.graphics.infos.FonInfo;
-import embgine.graphics.infos.Info;
-import embgine.graphics.infos.TexInfo;
+import embgine.graphics.shaders.Shader;
 import embgine.graphics.shapes.Shape;
 
 public class Splash {
@@ -18,32 +17,36 @@ public class Splash {
 	private Camera camera;
 	
 	private Transform gt;
-	private ColInfo white;
-	private TexInfo logo;
-	private FonInfo text;
 	
 	private Texture logoTex;
 	private Font logoFont;
 	
 	private Shape rect;
+	private Shader colorShader;
+	private Shader tileShader;
+	
+	private float width;
+	private float height;
+	
+	private char[][] madeWithEmbgine;
 	
 	public Splash(Camera c) {
 		camera = c;
-		
+		gt = new Transform();
 		rect = Shape.RECT;
+		colorShader = Shader.COL2DSHADER;
+		tileShader = Shader.TIL2DSHADER;
 		
-		gt = new Transform(0, 0, 0, 0, 0);
+		Transform ct = camera.getTransform();
+		width = ct.width;
+		height = ct.height;
 		
-		white = Info.COLINFO;
-		logo = Info.TEXINFO;
-		text = Info.FONINFO;
 		logoTex = new Texture("embgine/standard/logo.png");
-		logoFont = new Font(new Texture("embgine/standard/text.png", 16, 8), 8, 6);
-		text.setText(new char[][] {{'M','a','d','e',' ','W','i','t','h',' ','E','m','b','g','i','n','e'}});
-		text.setParams(logoFont, 9, true, true, true);
-		text.setColor(0, 0, 0, 1);
+		logoFont = new Font(new Texture("embgine/standard/text.png", 16, 8), 9, 5);
 		
 		timer = SHOW_TIME;
+		
+		madeWithEmbgine = new char[][] {{'M','a','d','e',' ','W','i','t','h',' ','E','m','b','g','i','n','e'}};
 	}
 	
 	public boolean update(Window w) {
@@ -58,22 +61,22 @@ public class Splash {
 	
 	public void render() {
 		
-		gt.set(0, 0, camera.getTransform().getWidth(), camera.getTransform().getHeight());
-		white.setColor(1, 1, 1, 1);
-		white.setShape(rect);
-		white.setTransform(gt);
-		white.render();
-		
+		gt.set(0, 0, width, height);
+		colorShader.enable(1f, 1f, 1f, 1f);
+		colorShader.setMvp(camera.getModelProjectionMatrix(camera.getModelMatrix(gt)));
+		rect.render();
+		colorShader.disable();
+
 		gt.set(96, 40, 64, 64);
-		logo.setTexture(logoTex);
-		logo.setShape(rect);
-		logo.setTransform(gt);
-		logo.render();
+		logoTex.bind();
+		tileShader.enable(1f, 1f, 1f, 1f, -1f, -1f, -1f, 1f);
+		tileShader.setMvp(camera.getModelProjectionMatrix(camera.getModelMatrix(gt)));
+		rect.render();
+		tileShader.disable();
+		logoTex.unbind();
 		
-		gt.setPosition(128, 112);
-		text.setShape(rect);
-		text.setTransform(gt);
-		text.render();
+		gt.set(128, 112, 9, 9);
+		logoFont.render(gt, true, madeWithEmbgine, true, 0f, 0f, 0f, 1f);
 		
 	}
 }

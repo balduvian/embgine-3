@@ -60,7 +60,7 @@ public class Index {
 		loadMapReferences(sc.getMapReferences());
 		loadMaps(sc.getMaps());
 		
-		sc.start();
+		sc.initialStart();
 	}
 	
 	/*
@@ -158,7 +158,7 @@ public class Index {
 				ex.printStackTrace();
 			}
 			
-			loader.giveType(i);
+			loader.setType(i);
 			
 			objectLoaderMap.put(Utils.getHashName(oc), loader);
 		}

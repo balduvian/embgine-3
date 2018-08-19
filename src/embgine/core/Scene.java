@@ -6,6 +6,7 @@ import embgine.core.elements.GameObject;
 import embgine.core.elements.Map;
 import embgine.core.loaders.BackgroundLoader;
 import embgine.core.loaders.BlockLoader;
+import embgine.core.loaders.ElementLoader;
 import embgine.core.loaders.MapLoader;
 import embgine.core.loaders.ObjectLoader;
 import embgine.core.scripts.MapScript;
@@ -30,57 +31,28 @@ public class Scene {
 	private Class<? extends MapReference>[] mapReferenceLoads;
 	private Class<? extends    MapLoader>[]    mapLoads;
 	
-	private Class<? extends StateScript<?>> initialClass;
-	private StateScript<SceneScript> initialState;
-	
-	private Manager objectManager;
-	private Manager mapManager;
-	private Manager backgroundManager;
-	
 	private int layers;
 	
 	private String switchValue;
 	
+	private Class<? extends StateScript<?>> initialClass;
+	private StateScript<SceneScript> initialState;
+	
 	private Class<? extends SceneScript> scriptClass;
 	private SceneScript script;
 	
-	private Element[] currentObjects;
-	private Element[] currentMaps;
-	private Element[] currentBackgrounds;
-	
-	private int maxObjects;
-	private int maxMaps;
-	private int maxBackgrounds;
+	private int maxElements;
+	private Manager manager;
 	
 	@SuppressWarnings("unchecked")
-	public Scene(Class<? extends SceneScript> sceneScript, Class<? extends StateScript<?>> stateScript, int numLayers, int maxO, int maxM, int maxB, String[] sounds, Class<? extends Font>[] fonts, Class<? extends ObjectLoader>[] objects, Class<? extends BackgroundLoader>[] backgrounds, Class<? extends BlockLoader>[] blocks, Class<? extends MapReference>[] refs, Class<? extends MapLoader>[] maps) {
+	public Scene(Class<? extends SceneScript> sceneScript, Class<? extends StateScript<?>> stateScript, int numLayers, int maxE, String[] sounds, Class<? extends Font>[] fonts, Class<? extends ObjectLoader>[] objects, Class<? extends BackgroundLoader>[] backgrounds, Class<? extends BlockLoader>[] blocks, Class<? extends MapReference>[] refs, Class<? extends MapLoader>[] maps) {
 	
-		try {
-			scriptClass = sceneScript;
-			script = (SceneScript)scriptClass.newInstance();
-			script.setScene(this);
-			script.setParent(index);
-		} catch (Exception ex) { 
-			ex.printStackTrace();
-			System.exit(-1);
-		}
-		
-		try {
-			initialClass = stateScript;
-			initialState = (StateScript<SceneScript>)stateScript.getConstructors()[0].newInstance();
-			initialState.setScene(this);
-			initialState.setParent(script);
-		} catch (Exception ex) { }
+		scriptClass = sceneScript;
+		initialClass = stateScript;
 		
 		layers = numLayers;
 		
-		maxObjects = maxO;
-		maxMaps = maxM;
-		maxBackgrounds = maxB;
-		
-		objectManager = new Manager(maxObjects);
-		mapManager = new Manager(maxMaps);
-		backgroundManager = new Manager(maxBackgrounds);
+		maxElements = maxE;
 		
 		soundLoads  = sounds;
 		fontLoads   = fonts;
@@ -96,25 +68,8 @@ public class Scene {
 		camera = index.getCamera();
 	}
 	
-	public void start() {
-		
-		objectManager = new Manager(maxObjects);
-		mapManager = new Manager(maxMaps);
-		backgroundManager = new Manager(maxBackgrounds);
-		
-		camera.getTransform().setPosition(0, 0);
-		
-		script.start();
-		
-		try {
-			initialState = (StateScript<SceneScript>)initialClass.getConstructors()[0].newInstance();
-			initialState.setScene(this);
-			initialState.setParent(script);
-		} catch (Exception ex) { }
-		
-		if(initialState != null) {
-			initialState.start();
-		}
+	public void initialStart() {
+		start(initialClass);
 	}
 	
 	/**
@@ -123,9 +78,7 @@ public class Scene {
 	 */
 	public void start(Class<? extends StateScript<? extends SceneScript>> s) {
 		
-		objectManager = new Manager(maxObjects);
-		mapManager = new Manager(maxMaps);
-		backgroundManager = new Manager(maxBackgrounds);
+		manager = new Manager(maxElements);
 		
 		try {
 			script = (SceneScript)scriptClass.newInstance();
@@ -150,36 +103,27 @@ public class Scene {
 		}
 	}
 	
-	public void resetObjects() {
-		objectManager.clear();
+	/**
+	 * gets the manager containing all elements in the scene, maybe you want to clear it idk
+	 * 
+	 * @return the scene's element manager
+	 */
+	public Manager getManager() {
+		return manager;
 	}
 	
-	public void resetMaps() {
-		mapManager.clear();
-	}
-	
-	public void resetBackgrounds() {
-		backgroundManager.clear();
-	}
-	
-	public void resetAll() {
-		resetObjects();
-		resetMaps();
-		resetBackgrounds();
-	}
-	
+	/**
+	 * updates the scene and all elements within
+	 */
 	public String update() {
-		
-		currentObjects = objectManager.onScreenUpdate(camera);
-		currentMaps = mapManager.onScreenUpdate(camera);
-		currentBackgrounds = backgroundManager.onScreenUpdate(camera);
 		
 		switchValue = null;
 		
+		manager.onScreenUpdate(camera);
+		
 		script.preUpdate();
 		
-		mapManager.update();
-		objectManager.update();	
+		manager.update();
 		
 		script.update();
 		
@@ -189,9 +133,7 @@ public class Scene {
 	public void render() {
 		
 		for(int l = 0; l < layers; ++l) {
-			mapManager.render(l);
-			objectManager.render(l);
-			backgroundManager.render(l);
+			manager.render(l);
 		}
 	}
 	
@@ -199,16 +141,8 @@ public class Scene {
 		return index;
 	}
 	
-	public void destroyObject(GameObject o) {
-		objectManager.remove(o.getIndex());
-	}
-	
-	public void destroyMap(Map o) {
-		mapManager.remove(o.getIndex());
-	}
-	
-	public void destroyBackground(Background o) {
-		backgroundManager.remove(o.getIndex());
+	public void destroyElement(Element o) {
+		manager.remove(o.getManagerIndex());
 	}
 	
 	public void switchScene(String s) {
@@ -216,49 +150,33 @@ public class Scene {
 	}
 	
 	/**
-     * gets the fbo handle
-     * @return fbo handle
+     * use this method to create any element type in the scene
+     * 
+     * @param loader - the loader that creates the element
+     * @param x - the x position for the element to be created at
+     * @param y - the y posiyion for the element to be created at
+     * 
+     * @return the element that was created
      */
-	public GameObject createObject(ObjectLoader loader, float x, float y, boolean e, Object... params) {
-		GameObject ret = loader.create(this, x, y, e);
-		objectManager.add(ret);
-		ObjectScript os = (ObjectScript)ret.getScript();
-		if(os != null) {
-			ret.getScript().start(params);
-		}
-		return ret;
-	}
-	
-	public Map createMap(MapLoader loader, int x, int y, boolean e, Object... params) {
-		Map ret = loader.create(this, x, y, e);
-		mapManager.add(ret);
-		MapScript ms = (MapScript)ret.getScript();
-		if(ms != null) {
-			ret.getScript().start(params);
-		}
-		return ret;
-	}
-	
-	public Background createBackground(BackgroundLoader loader, int x, int y, boolean e, float p) {
-		Background ret = loader.create(x, y, e, p);
-		backgroundManager.add(ret);
-		return ret;
-	}
-	
-	/*public Element createElement(ElementLoader loader, int x, int y, boolean e, Object... params) {
+	public Element createElement(ElementLoader<?> loader, int x, int y, boolean e, Object... params) {
 		Element ret = loader.create(this, x, y, e);
 		Script<?> s = ret.getScript();
 		if(s != null) {
-			
+			s.start(params);
 		}
 		return ret;
-	}*/
+	}
 	
-	public Sound sound(String s, float v, boolean r) {
-		Sound sound = index.getSound(s);
+	/**
+	 * plays a sound at a certain volume. You can also set if the song repeats
+	 * 
+	 * @param sound - the sound to play
+	 * @param v - the volume of the sound
+	 * @param r - whether the sounds repeats or not
+	 */
+	public void playSound(Sound sound, float v, boolean r) {
 		sound.setVolume(v);
 		sound.play(r);
-		return sound;
 	}
 	
 	public void stopSound(Sound s) {
@@ -269,21 +187,9 @@ public class Scene {
 		return script;
 	}
 	
-	public Element[] getCurrentObjects() {
-		return currentObjects;
-	}
-	
-	public Element[] getCurrentMaps() {
-		return currentMaps;
-	}
-	
-	public Element[] getCurrentBackgrounds() {
-		return currentBackgrounds;
-	}
-	
 	public void centerCamera(int x, int y) {
 		Transform cTransform = camera.getTransform();
-		cTransform.setPosition(x - cTransform.getWidth()/2 + Index.TILE/2, y - cTransform.getHeight()/2 + Index.TILE/2);
+		cTransform.setTranslation(x - cTransform.getWidth()/2 + Index.TILE/2, y - cTransform.getHeight()/2 + Index.TILE/2);
 	}
 	
 	/*

@@ -12,7 +12,7 @@ import embgine.core.elements.Map;
 import embgine.core.scripts.MapScript;
 import embgine.graphics.Transform;
 
-public class MapLoader {
+public class MapLoader extends ElementLoader{
 	
 	public static final boolean   EDGE_FILL = false;
 	public static final boolean EDGE_REPEAT =  true;
@@ -21,8 +21,6 @@ public class MapLoader {
 	private Class<? extends MapScript> script;
 	private BlockLoader[][] tiles;
 	private int[][][] tileValues;
-	private boolean edgeMode;
-	private BlockLoader edgeTile;
 	
 	private String mapPath;
 	private String referenceName;
@@ -32,14 +30,14 @@ public class MapLoader {
 	private boolean repeatRight;
 	private boolean repeatDown;
 	private boolean repeatLeft;
+	private BlockLoader edgeTile;
 	
 	private int type;
 	
-	public MapLoader(String mp, String rn, String en, boolean em, boolean ru, boolean rr, boolean rd, boolean rl, Class<? extends MapScript> sc) {
+	public MapLoader(String mp, String rn, String en, boolean ru, boolean rr, boolean rd, boolean rl, Class<? extends MapScript> sc) {
 		mapPath = mp;
 		referenceName = rn;
 		edgeTileName = en;
-		edgeMode = em;
 		repeatUp = ru;
 		repeatRight = rr;
 		repeatDown = rd;
@@ -71,7 +69,7 @@ public class MapLoader {
 		
 		Transform transform = new Transform(x, y, mapWidth, mapHeight);
 		
-		return new Map(transform, sInstance, enabled, type, workingCopy, edgeMode, repeatUp, repeatRight, repeatDown, repeatLeft, edgeTile);
+		return new Map(transform, sInstance, enabled, type, workingCopy, repeatUp, repeatRight, repeatDown, repeatLeft, edgeTile, layer);
 	}
 	
 	public void init(Index index, int t) {

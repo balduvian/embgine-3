@@ -1,5 +1,7 @@
 package embgine.graphics.shapes;
 
+import org.lwjgl.opengl.GL11;
+
 public class RectShape extends Shape{
 
 	public RectShape() {
@@ -18,7 +20,7 @@ public class RectShape extends Shape{
 			        0, 1,
 			        0, 0
 				},
-				Shape.TRIANGLES
+				GL11.GL_TRIANGLES
 		);
 	}
 	

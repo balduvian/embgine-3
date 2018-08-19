@@ -2,10 +2,10 @@ package game.scripts;
 
 import embgine.core.Base;
 import embgine.core.Block;
+import embgine.core.HitBox;
 import embgine.core.Index;
 import embgine.core.Scene;
 import embgine.core.components.CliRenderer;
-import embgine.core.components.HitBox;
 import embgine.core.components.TilRenderer;
 import embgine.core.elements.Element;
 import embgine.core.elements.GameObject;
@@ -146,7 +146,7 @@ public class PlayerScript extends ObjectScript{
 						if(!air) {
 							yVel = -jumpSpeed;
 							jumpTimer = jumpTime;
-							scene.sound("jump.wav", 1, false);
+							scene.playSound("jump.wav", 1, false);
 							bufferedJump = false;
 						}else {
 							jumpBufferTimer = 0.1;
@@ -159,7 +159,7 @@ public class PlayerScript extends ObjectScript{
 				if(!air) {
 					yVel = -jumpSpeed;
 					jumpTimer = jumpTime;
-					scene.sound("jump.wav", 1, false);
+					scene.playSound("jump.wav", 1, false);
 					bufferedJump = false;
 				}
 			}
@@ -249,15 +249,15 @@ public class PlayerScript extends ObjectScript{
 			//System.out.println(downMapY);
 			
 			//System.out.println(collBox.getRight() + " " + map.accessX(collBox.getRight()) );
-			int leftMapX = map.accessX(collBox.getLeft());
-			int rightMapX = map.accessX(collBox.getRight());
+			int leftMapX = map.accessAtX(collBox.getLeft());
+			int rightMapX = map.accessAtX(collBox.getRight());
 		
 			//System.out.println(nowY);
 			
 			down: for(int j = upMapY + 1; j <= downMapY + 1; ++j) {
-				limit = map.positionY(j) - 1 - collBox.getJustDown();
+				limit = map.positionAtY(j) - 1 - collBox.getJustDown();
 				for(int i = leftMapX; i <= rightMapX; ++i) {
-					Block b = map.access(i, j);
+					Block b = map.edgeAccess(i, j);
 					if(b != null) {
 						if(b.isSolid()) {
 							if(nowY + frameY > limit) {
@@ -277,9 +277,9 @@ public class PlayerScript extends ObjectScript{
 			}
 		
 			up: for(int j = upMapY - 1; j <= downMapY - 1; ++j) {
-				limit = map.positionY(j) + 16 - collBox.getJustUp();
+				limit = map.positionAtY(j) + 16 - collBox.getJustUp();
 				for(int i = leftMapX; i <= rightMapX; ++i) {
-					Block b = map.access(i, j);
+					Block b = map.edgeAccess(i, j);
 					if(b != null) {
 						if(b.isSolid()) {
 							if(nowY + frameY < limit) {
@@ -296,9 +296,9 @@ public class PlayerScript extends ObjectScript{
 			}
 		
 			right: for(int j = leftMapX + 1; j <= rightMapX + 1; ++j) {
-				limit = map.positionX(j) - collBox.getJustRight() - 2;
+				limit = map.positionAtX(j) - collBox.getJustRight() - 2;
 				for(int i = upMapY; i <= downMapY; ++i) {
-					Block b = map.access(j, i);
+					Block b = map.edgeAccess(j, i);
 					if(b != null) {
 						if(b.isSolid()) {
 							if(nowX + frameX > limit) {
@@ -316,9 +316,9 @@ public class PlayerScript extends ObjectScript{
 			}
 		
 			left: for(int j = leftMapX - 1; j <= rightMapX; ++j) {
-				limit = map.positionX(j) + 17 - collBox.getJustLeft();
+				limit = map.positionAtX(j) + 17 - collBox.getJustLeft();
 				for(int i = upMapY; i <= downMapY; ++i) {
-					Block b = map.access(j, i);
+					Block b = map.edgeAccess(j, i);
 					if(b != null) {
 						if(b.isSolid()) {
 							if(nowX + frameX < limit) {
@@ -338,7 +338,7 @@ public class PlayerScript extends ObjectScript{
 		}
 		
 		if((collLeft && collRight) || touchingSpike) {
-			scene.sound("crush.wav", 0.25f, false);
+			scene.playSound("crush.wav", 0.25f, false);
 			((GameScript)scene.getScript()).die();
 		}
 	}
@@ -395,7 +395,7 @@ public class PlayerScript extends ObjectScript{
 		((CliRenderer)parent.getComponent(0)).setFrame(animFrame, animRow);
 		((CliRenderer)parent.getComponent(0)).setPlane(0, 0, 0, 0);
 		Shape.RECT.getTransform().set(new Transform(-2, 0, -16, 16));
-		((CliRenderer)parent.getComponent(0)).setView(Shape.RECT.getMatrix());
+		((CliRenderer)parent.getComponent(0)).setView(Shape.RECT.getViewMatrix());
 		
 	}
 	
@@ -422,13 +422,13 @@ public class PlayerScript extends ObjectScript{
 			//System.out.println(downMapY);
 			
 			//System.out.println(collBox.getRight() + " " + map.accessX(collBox.getRight()) );
-			int leftMapX = map.accessX(collBox.getLeft());
-			int rightMapX = map.accessX(collBox.getRight());
+			int leftMapX = map.accessAtX(collBox.getLeft());
+			int rightMapX = map.accessAtX(collBox.getRight());
 			
 			down: for(int j = upMapY + 1; j <= downMapY + 1; ++j) {
-				int limit = map.positionY(j) - 1 - collBox.getJustDown();
+				int limit = map.positionAtY(j) - 1 - collBox.getJustDown();
 				for(int i = leftMapX; i <= rightMapX; ++i) {
-					Block b = map.access(i, j);
+					Block b = map.edgeAccess(i, j);
 					if(b != null && b.isSolid()) {
 						if(nowY + frameY > limit) {
 							//System.out.println("colid");
@@ -456,7 +456,7 @@ public class PlayerScript extends ObjectScript{
 		
 		((CliRenderer)parent.getComponent(0)).setFrame(animFrame, 0);
 		Shape.RECT.getTransform().set(new Transform(-2, 0, -16, 16));
-		((CliRenderer)parent.getComponent(0)).setView(Shape.RECT.getMatrix());
+		((CliRenderer)parent.getComponent(0)).setView(Shape.RECT.getViewMatrix());
 		
 	}
 	

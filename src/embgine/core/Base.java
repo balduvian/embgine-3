@@ -2,8 +2,6 @@
 
 package embgine.core;
 
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
 
 import org.joml.Matrix4f;
@@ -16,7 +14,6 @@ import embgine.graphics.Camera;
 import embgine.graphics.FBO;
 import embgine.graphics.Texture;
 import embgine.graphics.Window;
-import embgine.graphics.infos.Info;
 import embgine.graphics.shaders.Shader;
 import embgine.graphics.shapes.Shape;
 
@@ -47,7 +44,7 @@ public class Base{
 	private boolean debugMode;
 	private boolean fullScreen;
 	
-	private FBO frameBuffer;
+	private FBO screenBuffer;
 	
 	private float scan;
 	private float scanSpeed;
@@ -89,15 +86,15 @@ public class Base{
 			Shape.init(camera);
 			GameObject.init(camera);
 			Shader.init();
-			Info.init();
+			Font.init(camera);
 			Background.init(camera);
 			
-			index = new Index(tileSize, gameWidth, gameHeight, name, debugMode, camera, window, audio, gd.sceneList);
+			//index = new Index(tileSize, gameWidth, gameHeight, name, debugMode, camera, window, audio, gd.sceneList);
 			
 			splash = new Splash(camera);
 			intro = true;
 			
-			frameBuffer = new FBO(new Texture((int)gameWidth, (int)gameHeight));
+			screenBuffer = new FBO(new Texture((int)gameWidth, (int)gameHeight));
 			
 			master.beginGame();
 			
@@ -172,12 +169,11 @@ public class Base{
 	}
 	
 	private void render() {
-		//window.clear();
 		
-		frameBuffer.prepareForTexture();
+		screenBuffer.enable();
 		
 		glClearColor(1, 0, 1, 1);
-		glClear(GL_COLOR_BUFFER_BIT);
+		window.clear();
 		
 		if(intro) {
 			splash.render();
@@ -185,34 +181,29 @@ public class Base{
 			scene.render();
 		}
 		
-		FBO.prepareDefaultRender(window);
+		FBO.disable(window);
 		
 		float wRatio = (float)window.getWidth() / window.getHeight();
 		
 		float gRatio = (float)gameWidth / gameHeight;
 		
-		glClearColor(0, 0, 1, 1);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClearColor(0, 0, 0, 1);
+		window.clear();
 		
 		Shape rect = Shape.RECT;
 		Shader sd = Shader.VHS2DSHADER;
-		Shader bl = Shader.COL2DSHADER;
 		
-		bl.enable(0, 0, 0, 1);
-		bl.setMvp(Shape.getNonCameraMatrix(1, 1));
-		rect.getVAO().render();
-		bl.disable();
+		screenBuffer.getBoundTexture().bind();
 		
-		frameBuffer.getBoundTexture().bind();
 		sd.enable(Utils.random(), scan);
 		
 		if(wRatio > gRatio) {
-			sd.setMvp(Shape.getNonCameraMatrix( gRatio/wRatio , 1 ));
+			sd.setMvp(camera.ndcFullMatrix( gRatio/wRatio , 1 ));
 		}else {
-			sd.setMvp(Shape.getNonCameraMatrix( 1 , wRatio/gRatio ));
+			sd.setMvp(camera.ndcFullMatrix( 1 , wRatio/gRatio ));
 		}
 		
-		rect.getVAO().render();
+		rect.render();
 		sd.disable();
 		
 		scan -= time*scanSpeed;
@@ -221,7 +212,7 @@ public class Base{
 			rescan();
 		}
 		
-		frameBuffer.getBoundTexture().unbind();
+		screenBuffer.getBoundTexture().unbind();
 		
 	}
 	

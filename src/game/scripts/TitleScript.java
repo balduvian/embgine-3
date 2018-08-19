@@ -65,7 +65,7 @@ public class TitleScript extends SceneScript{
 				if(menuLayer == 0 && !upRelease) {
 					--selection;
 					selection %= 2;
-					scene.sound("switch.wav", 1, false);
+					scene.playSound("switch.wav", 1, false);
 					upRelease = true;
 				}
 			}else {
@@ -77,7 +77,7 @@ public class TitleScript extends SceneScript{
 				if(menuLayer == 0 && !downRelease) {
 					++selection;
 					selection %= 2;
-					scene.sound("switch.wav", 1, false);
+					scene.playSound("switch.wav", 1, false);
 					downRelease = true;
 				}
 			}else {
@@ -105,7 +105,7 @@ public class TitleScript extends SceneScript{
 							menuLayer = 1;
 							CrushyMaster.readBestTime();
 							((FonRenderer)panel.getComponent(1)).setText(CrushyMaster.BEST_STRING);
-							((FonRenderer)panel.getComponent(1)).getTransform().setPosition(116,68);
+							((FonRenderer)panel.getComponent(1)).getTransform().setTranslation(116,68);
 							//((FonRenderer)panel.getComponent(1)).getTransform().setPosition(0, 0);
 							panel.setEnabled(true);
 						}else {
@@ -155,7 +155,7 @@ public class TitleScript extends SceneScript{
 			case(STAGE_CAT_FLY):
 				cat.getTransform().setY(0);
 				stage = STAGE_TITLE_FLY;
-				scene.sound("slide.wav", 1, false);
+				scene.playSound("slide.wav", 1, false);
 				break;
 			case(STAGE_TITLE_FLY):
 				text.getTransform().setY(0);

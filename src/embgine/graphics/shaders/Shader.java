@@ -10,6 +10,16 @@ import org.joml.Matrix4f;
 
 abstract public class Shader {
 	
+	/**
+	 * the program ID of the shader
+	 */
+	protected int program;
+	
+	/**
+	 * all these shaders use the model view projection matrix, this is the uniform location
+	 */
+	protected int mvpLoc;
+	
 	public static Til2DShader TIL2DSHADER;
 	public static Col2DShader COL2DSHADER;
 	public static Cir2DShader CIR2DSHADER;
@@ -18,12 +28,9 @@ abstract public class Shader {
 	public static Sel2DShader SEL2DSHADER;
 	public static Cli2DShader CLI2DSHADER;
 	
-	protected int program;
-	
-	protected int mvpLoc;
-	
-	protected int numParams;
-	
+	/**
+	 * statically initializes all the shaders for the game
+	 */
 	public static void init() {
 		COL2DSHADER = new Col2DShader();
 		TIL2DSHADER = new Til2DShader();
@@ -34,7 +41,13 @@ abstract public class Shader {
 		CLI2DSHADER = new Cli2DShader();
 	}
 	
-	protected Shader(String vertPath, String fragPath, int numP) {
+	/**
+	 * creates a shader
+	 * 
+	 * @param vertPath - path to the base code of the vertex shader
+	 * @param fragPath - path to the base code of the fragment shader
+	 */
+	protected Shader(String vertPath, String fragPath) {
 		program = glCreateProgram();
 		int vert = loadShader(vertPath, GL_VERTEX_SHADER);
 		int frag = loadShader(fragPath, GL_FRAGMENT_SHADER);
@@ -47,8 +60,6 @@ abstract public class Shader {
 		glDeleteShader(frag);
 		
 		mvpLoc = glGetUniformLocation(program, "mvp");
-		
-		numParams = numP;
 		
 		getUniforms();
 	}
@@ -72,40 +83,46 @@ abstract public class Shader {
 		
 		glCompileShader(shader);
 		if(glGetShaderi(shader,GL_COMPILE_STATUS) != 1) {
-			throw new RuntimeException("Failed to compile shader | "+path+" | "+type+" | "+glGetShaderInfoLog(shader));
+			throw new RuntimeException("Failed to compile shader | " + path + " | " + type + " | " + glGetShaderInfoLog(shader));
 		}
 		return shader;
 	}
 	
 	protected abstract void getUniforms();
 	
-	public void setMvp(Matrix4f m) {
-		glUniformMatrix4fv(mvpLoc, false, m.get(new float[16]));
+	public void setMvp(Matrix4f mvp) {
+		glUniformMatrix4fv(mvpLoc, false, mvp.get(new float[16]));
 	}
 	
-	//render with passing information
-	public void enable(float... p) {
+	/**
+	 * starts to use the shader
+	 * 
+	 * @param params - literally anything you want you can pass into the shader
+	 */
+	public void enable(Object... params) {
 		glUseProgram(program);
-		subRoutine(p);
+		sendUniforms(params);
 	}
 	
-	//this is what each shader uses to pass information into the shader
-	abstract protected void subRoutine(float[] p);
+	/**
+	 * override this method to pass in uniforms to the shader
+	 * 
+	 * @param params - the parameters passed into the shader. Do with them what you will
+	 */
+	abstract protected void sendUniforms(Object... params);
 	
-	//run the shader without passing anything or calling the sub routine
-	public void enable() {
-		glUseProgram(program);
-	}
-	
+	/**
+	 * call this after rendering is done to stop using the shader
+	 */
 	public void disable() {
 		glUseProgram(0);
 	}
 	
+	/**
+	 * deletes the shader from opengl
+	 */
 	public void destroy() {
 		glDeleteProgram(program);
 	}
-	
-	public int getNumParams() {
-		return numParams;
-	}
+
 }

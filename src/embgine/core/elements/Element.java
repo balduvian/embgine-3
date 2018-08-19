@@ -1,29 +1,46 @@
 package embgine.core.elements;
 
+import embgine.core.Index;
 import embgine.core.scripts.Script;
 import embgine.graphics.Camera;
 import embgine.graphics.Transform;
+import embgine.graphics.Window;
 
 abstract public class Element {
 	
+	protected static Index index;
+	protected static Camera camera;
+	protected static Window window;
+	
 	protected Script<?> script;
-	
 	protected Transform transform;
-	
-	protected int index;
-	
 	protected boolean enabled;
-	
 	protected boolean onScreen;
-	
+	protected int managerIndex;
 	protected int type;
+	protected int layer;
 	
-	public Element(Transform t, Script<?> s, boolean e, int y) {
+	public Element(Transform t, Script<?> s, boolean e, int y, int l) {
 		transform = t;
 		script = s;
 		enabled = e;
 		type = y;
+		layer = l;
 		onScreen = true;
+	}
+	
+	/**
+	 * statically gives the element class and all of its extensions some important game stuff
+	 * 
+	 * @param x - the game index
+	 * @param c - the game camera
+	 * @param w - the game window
+	 * 
+	 */
+	public static void init(Index x, Camera c, Window w) {
+		index = x;
+		camera = c;
+		window = w;
 	}
 	
 	//GETTERS
@@ -35,8 +52,8 @@ abstract public class Element {
 		return transform;
 	}
 	
-	public int getIndex() {
-		return index;
+	public int getManagerIndex() {
+		return managerIndex;
 	}
 	
 	public boolean getEnabled() {
@@ -51,9 +68,13 @@ abstract public class Element {
 		return type;
 	}
 	
+	public int getLayer() {
+		return layer;
+	}
+	
 	//SETTERS
 	public void setIndex(int value) {
-		index = value;
+		managerIndex = value;
 	}
 	
 	public void setEnabled(boolean value) {
@@ -66,6 +87,10 @@ abstract public class Element {
 	
 	public void setType(int value) {
 		type = value;
+	}
+	
+	public void setLayer(int value) {
+		layer = value;
 	}
 	
 	//ROUTINE

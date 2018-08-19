@@ -102,6 +102,24 @@ public class CrushyMaster extends Master{
 		}
 	}
 	
+	/**
+	 * fills a character array you give it with the time from an amount of nanoseconds.
+	 * Make sure your fill array is [1]*[11]
+	 * 
+	 * @param fill - the array to fill
+	 * @param nanos - the time to format and fill it with
+	 */
+	public static void charTime(char[][] fill, long nanos){
+		nanos /= 1000000;
+		char[] line = fill[0];
+		charTime(line, 1, (nanos /= 10) % 100);
+		line[2] = ':';
+		charTime(line, 4, (nanos /= 100) % 60);
+		line[5] = ':';
+		charTime(line, 7, (nanos /= 60) % 60);
+		line[8] = ':';
+		charTime(line, 10, (nanos /= 60) % 100);
+	}
 	
 	public static String toTime(long d) {
 		long time = d / 1000000;
@@ -110,6 +128,31 @@ public class CrushyMaster extends Master{
 		int minutes = (int)(time / 60000)%60;
 		int hours   = (int)(time / 3600000);
 		return(st(hours)+":"+st(minutes)+":"+st(seconds)+":"+st(decimal));
+	}
+	
+	/**
+	 * puts two chars into a char array that are the digit char representation of a long.
+	 * Only works correctly for values 0 - 99 inclusive
+	 * 
+	 * @param place - the character array to place the digits in
+	 * @param end - where to put the last digit
+	 * @param value - the long to get digits from
+	 */
+	public static void charTime(char[] place, int end, long value) {
+		
+		//places the last didit of the number at end
+		//adds 48 to bring it to the ascii number characters
+		place[end] = (char) (value % 10 + 48);
+		
+		//go until the value is 10 or less
+		while(value < 11) {
+			//chop off a digit until we're left with the first digit
+			value /= 10;
+		}
+		
+		//place the first digit one behind the last digit
+		place[end - 1] = (char) (value + 48);
+		
 	}
 	
 	private static String st(int in) {

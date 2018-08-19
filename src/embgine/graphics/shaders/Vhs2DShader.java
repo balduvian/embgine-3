@@ -8,13 +8,13 @@ public class Vhs2DShader extends Shader {
 	private int randLoc;
 	private int scanLoc;
 	
-	protected void subRoutine(float[] p) {
-		glUniform1f(randLoc, p[0]);
-		glUniform1f(scanLoc, p[1]);
+	protected void sendUniforms(Object... params) {
+		glUniform1f(randLoc, (float)params[0]);
+		glUniform1f(scanLoc, (float)params[1]);
 	}
 	
 	public Vhs2DShader() {
-		super("embgine/shaders/vhs2d.vs", "embgine/shaders/vhs2d.fs", 0);
+		super("embgine/shaders/vhs2d.vs", "embgine/shaders/vhs2d.fs");
 	}
 	
 	protected void getUniforms() {
